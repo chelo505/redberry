@@ -1,7 +1,7 @@
 <template>
 <div class="app">
     <div class="nav-bar">
-      <img class="nav-bar-image" src="./assets/Frame 1000006027.png">
+      <img @click="goToHome" class="nav-bar-image" src="./assets/Frame 1000006027.png">
       <div class="empasign-container">
         <button class="employee-create">თანამშრომლის შექმნა</button>
         <button class="assignment-create">+ შექმენი ახალი დავალება</button>
@@ -12,18 +12,33 @@
 </template>
 
 <script>
+import router from './router';
+
 export default {
   name: "App",
   data() {
 
   },
   methods: {
-
+    goToHome() {
+      router.push('/')
+    }
   }
 }
 </script>
 
 <style>
+@font-face {
+  font-family: "FiraGO";
+  src: url("/src/assets/FiraGO-Book.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: "firaGO";
+}
+
 * {
   padding: 0px;
   margin: 0px;
@@ -53,6 +68,7 @@ body {
   width: 210px;
   height: 38px;
   gap: 4px;
+  cursor: pointer
 }
 
 .empasign-container {
@@ -75,13 +91,12 @@ body {
   padding-bottom: 10px;
   padding-left: 20px;
   border: 1px solid hsl(265, 83%, 57%);
-  font-family: 'FiraGO';
   font-weight: 400;
   font-size: 16px;
   letter-spacing: 0%;
   color: #212529;
   margin-right: 40px;
-  line-height: 0;
+  line-height: 100%;
   background: #FFFFFF;
   cursor: pointer;
   transition: background 0.3s;
@@ -102,10 +117,9 @@ body {
   padding-left: 20px;
   background: #8338EC;
   border: 0px;
-  font-family: 'FiraGO';
   font-weight: 400;
   font-size: 16px;
-  line-height: 0;
+  line-height: 100%;
   letter-spacing: 0%;
   color: white;
   cursor: pointer;
