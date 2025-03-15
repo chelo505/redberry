@@ -54,7 +54,7 @@
               </button>
             </div>
             <div v-else class="upload-placeholder" @click="triggerFileInput">
-              <span class="upload-text">None</span>
+              <span class="upload-text">ატვირთეთ ფოტო</span>
               <input 
                 ref="fileInput"
                 type="file" 

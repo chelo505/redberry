@@ -7,13 +7,13 @@
         <button @click="goToAssignmentCreatePage" class="assignment-create">+ შექმენი ახალი დავალება</button>
       </div>
     </div>
-  
+  <Transition mode="in-out" fade>
     <EmployeeModal 
       :showModal="showEmployeeModal" 
       @close="showEmployeeModal = false"
       @employee-created="handleEmployeeCreated"
     />
-    
+  </Transition>
     <router-view @open-employee-modal="openEmployeeModal"></router-view>
   </div>
 </template>
@@ -42,8 +42,8 @@ export default {
     openEmployeeModal() {
       this.showEmployeeModal = true
     },
-    handleEmployeeCreated(employeeData) {
-      console.log('New employee created:', employeeData)
+    handleEmployeeCreated() {
+      alert("Employee created!")
     }
   }
 }
@@ -57,10 +57,6 @@ export default {
   font-style: normal;
 }
 
-body {
-  font-family: "firaGO";
-}
-
 * {
   padding: 0px;
   margin: 0px;
@@ -70,6 +66,7 @@ body {
   width: 1920px;
   height: 1080px;
   overflow-x: hidden;
+  font-family: "firaGO";
 }
 
 .nav-bar {
@@ -150,5 +147,15 @@ body {
 
 .assignment-create:hover {
   background: #5c0fc7;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>

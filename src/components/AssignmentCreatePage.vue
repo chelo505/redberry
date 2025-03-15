@@ -7,28 +7,23 @@
         <div class="form-title">
         <label>სათაური*</label>
         <input @input="checkMoreThan" type="text" v-model="formData.name" class="form-title-select" required>
-        <small id="titleLower" class="form-text">მინიმუმ 3 სიმბოლო</small>
-        <small id="titleHigher" class="form-text">მაქსიმუმ 255 სიმბოლო</small>
+        <small id="titleLower" class="form-text" style="color: red">მინიმუმ 3 სიმბოლო</small>
+        <small id="titleHigher" class="form-text" style="color: green">მაქსიმუმ 255 სიმბოლო</small>
       </div>
       <div class="form-description">
         <label>აღწერა</label>
         <textarea @input="checkMoreThan" v-model="formData.description" class="form-control"></textarea>
-        <small id="descRestrictLower" class="form-text">მინიმუმ 4 სიტყვა</small>
-        <small id="descRestrictHigher" class="form-text">მაქსიმუმ 255 სიმბოლო</small>
+        <small id="descRestrictLower" class="form-text" style="color: red">მინიმუმ 4 სიტყვა</small>
+        <small id="descRestrictHigher" class="form-text" style="color: green">მაქსიმუმ 255 სიმბოლო</small>
       </div>
       <div class="form-priority">
           <label>პრიორიტეტი*</label>
           <div class="priority-wrapper">
             <div class="custom-select" @click="toggleIcons">
-              <span>{{ getSelectedPriorityName() }}</span>
+              <img class='priority-icon-default' :src="getSelectedPriorityName()[1]">
+              <span class="priority-default">{{ getSelectedPriorityName()[0] }}</span>
               <img class="dropdown-arrow" :src="require('@/assets/IconBlack.svg')">
             </div>
-            <select :selected="defaultPrio" v-model="formData.priority" class="hidden-select" required>
-              <option value='' disabled>{{ defaultPrio.name }}</option>
-              <option v-for="p in priorities" :key="p.id" :value="p.id">
-                {{ p.name }}
-              </option> 
-            </select>
             <div v-show="showIcons" class="priority-icons-container">
               <div 
                 v-for="prio in priorities" 
@@ -44,8 +39,7 @@
         </div>
         <div class="form-status">
           <label>სტატუსი*</label>
-          <select :selected="defaultStatus" v-model="formData.status" class="form-status-select" required>
-            <option value="" disabled>{{ defaultStatus.name }}</option>
+          <select :selected="defaultStatus.id" v-model="formData.status" class="form-status-select">
             <option v-for="s in statuses" :key="s.id" :value="s.id">
               {{ s.name }}
             </option>
@@ -55,7 +49,7 @@
     <div class="form-right-container">
         <div class="form-department">
         <label>დეპარტამენტი*</label>
-        <select @change="this.departmentSelected = true" v-model="formData.department" class="form-department-select" required>
+        <select @change="updateEmployees" v-model="formData.department" class="form-department-select" required>
             <option v-for="dept in departments" :key="dept.id" :value="dept.id">
             {{ dept.name }}
             </option>
@@ -65,44 +59,51 @@
         <label>პასუხისმგებელი თანამშრომელი*</label>
         <div class="employee-wrapper">
             <div class="custom-select-employee" @click="toggleAvatars">
-              <span>{{ getSelectedEmployeeName() }}</span>
+              <img :src="getSelectedEmployeeName()[1]" class="selected-employee-avatar">
+              <span class="selected-employee-name">{{ getSelectedEmployeeName()[0] }}</span>
               <img class="dropdown-arrow" :src="require('@/assets/IconBlack.svg')">
             </div>
-            <select v-model="formData.employees" class="hidden-select" required>
-              <option value='' disabled>აირჩიე თანამშრომელი</option>
-              <option v-for="e in employees" :key="e.id" :value="e.id">
-                {{ e.name }}
-              </option> 
-            </select>
             <div v-show="showAvatars" class="employee-avatars-container">
+              <button @click="showEmployeeModal = true" class="employee-create-button">თანამშრომლის შექმნა</button>
               <div 
-                v-for="emp in employees" 
+                v-for="emp in selectedDepEmployees" 
                 :key="emp.id" 
                 @click="selectEmployee(emp.id)"
               >
                 <img :src="emp.avatar" class="employee-avatar">
-                <span>{{ emp.name }}</span>
+                <span class="employee-name">{{ emp.name+" " }} {{ emp.surname }}</span>
               </div>
             </div>
           </div>
         </div>
         <div class="form-deadline">
-            <label>დედლაინი</label>
-            <input type="date" v-model="formData.deadline" class="form-deadline-input">
+            <label>დედლაინი*</label>
+            <input type="date" v-model="formData.deadline" class="form-deadline-input" required>
         </div>
         <div class="button-container">
-            <button type="submit" class="submit-button">დავალების შექმნა</button>
+            <button @click="submitForm" type="submit" class="submit-button">დავალების შექმნა</button>
         </div>
       </div>
       </form>
     </div>
   </div>
+  <Transition mode="in-out" fade>
+    <EmployeeModal 
+      :showModal="showEmployeeModal" 
+      @close="showEmployeeModal = false"
+      @employee-created="handleEmployeeCreated"
+    />
+  </Transition>
 </template>
 
 <script>
 import axios from 'axios'
+import EmployeeModal from './EmployeeModal.vue'
 
 export default {
+  components: {
+    EmployeeModal
+  },
   data() {
     return {
       formData: {
@@ -117,14 +118,16 @@ export default {
       departments: [],
       priorities: [],
       employees: [],
+      selectedDepEmployees: [],
       statuses: [],
       departmentSelected: false,
       selectedDepartment: null,
       token: "9e6af86e-8086-496a-8001-5919972b5772",
-      defaultPrio: "საშუალო",
-      defaultStatus: "დასაწყები",
+      defaultPrio: '',
+      defaultStatus: '',
       showIcons: false,
-      showAvatars: false
+      showAvatars: false,
+      showEmployeeModal: false
     }
   },
   created() {
@@ -134,9 +137,11 @@ export default {
     this.fetchStatusesData()
     
     document.addEventListener('click', this.handleClickOutside)
+    document.addEventListener('click', this.handleClickOutsideEmp)
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
+    document.removeEventListener('click', this.handleClickOutsideEmp)
   },
   methods: {
     async fetchDepartmentData() {
@@ -149,7 +154,10 @@ export default {
       .catch(error => console.log(error))
       this.priorities = response.data
       for (let prio of this.priorities) {
-        if (prio.name == 'საშუალო') this.defaultPrio = prio
+        if (prio.name == 'საშუალო') {
+          this.defaultPrio = prio
+          this.formData.priority = prio.id
+        }
       }
     },
     async fetchEmployeesData() {
@@ -158,16 +166,17 @@ export default {
           Authorization: `Bearer ${this.token}`
         }
       }).catch(error => console.log(error))
-      for (let employee of response.data) {
-        if (employee.department_id == this.formData.department.id) this.employees.push(employee)
-      }
+      this.employees = response.data
     },
     async fetchStatusesData() {
       const response = await axios("https://momentum.redberryinternship.ge/api/statuses")
       .catch(error => console.log(error))
       this.statuses = response.data
       for (let stat of this.statuses) {
-        if (stat.name == 'დასაწყები') this.defaultStatus = stat
+        if (stat.name == 'დასაწყები') {
+          this.defaultStatus = stat
+          this.formData.status = stat.id
+        }
       }
     },
     toggleIcons(event) {
@@ -200,28 +209,92 @@ export default {
     },
     getSelectedPriorityName() {
       if (!this.formData.priority) {
-        return this.defaultPrio.name
+        return [this.defaultPrio.name, this.defaultPrio.icon]
       }
       
       const selectedPriority = this.priorities.find(p => p.id === this.formData.priority)
-      return selectedPriority ? selectedPriority.name : this.defaultPrio.name
+      return [selectedPriority ? selectedPriority.name : this.defaultPrio.name, selectedPriority.icon]
     },
     getSelectedEmployeeName() {
       if (!this.formData.employees) {
-        return "აირჩიე თანამშრომელი"
+        return ""
       }
 
       const selectedEmployee = this.employees.find(e => e.id === this.formData.employees)
-      return selectedEmployee.name
+      return [`${selectedEmployee.name} ${selectedEmployee.surname}`, selectedEmployee.avatar]
+    },
+    updateEmployees() {
+      this.selectedDepEmployees = []
+      this.departmentSelected = true
+      for (let employee of this.employees) {
+        if (employee.department.id == this.formData.department) {
+          this.selectedDepEmployees.push(employee)
+        }
+      }
     },
     submitForm() {
       if (this.validateForm()) {
-        console.log('Form submitted:', this.formData)
-        this.$emit('form-submitted', this.formData)
+        const formData = new FormData()
+        formData.append('name', this.formData.name)
+        formData.append('description', this.formData.description)
+        formData.append('due_date', this.formData.deadline)
+        formData.append('status_id', this.formData.status)
+        formData.append('employee_id', this.formData.employees)
+        formData.append('priority_id', this.formData.priority)
+        
+        axios.post("https://momentum.redberryinternship.ge/api/tasks/", formData, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }).catch(error => console.log(error))
+        
+        this.$emit('employee-created', formData)
+        alert("Task has been created!")
+        this.resetForm()
       }
     },
+    resetForm() {
+      this.formData.name = ''
+      this.formData.deadline = ''
+      this.formData.description = ''
+      this.formData.department = ''
+      this.formData.employees = ''
+      this.formData.status = this.defaultStatus.id
+      this.formData.priority = this.defaultPrio.id
+    },
     validateForm() {
-      return true
+      let isValid = true
+      
+      if (!this.formData.name || this.formData.name.length < 3 || this.formData.name.length > 255) {
+        isValid = false
+      }
+      
+      if ((this.formData.description.length > 1 && (this.formData.description.trim().split(" ").length) <= 3) || this.formData.description.length > 255) {
+        isValid = false
+      }
+      
+      if (!this.formData.status) {
+        isValid = false
+      }
+      
+      if (!this.formData.priority) {
+        isValid = false
+      }
+      
+      if (!this.formData.department) {
+        isValid = false
+      }
+      
+      if (!this.formData.employees) {
+        isValid = false
+      }
+      
+      if (!this.formData.deadline) {
+        isValid = false
+      }
+
+      return isValid
     },
     toggleDep() {
         this.departmentSelected = !this.departmentSelected
@@ -229,29 +302,35 @@ export default {
     checkMoreThan() {
       const lower = document.getElementById('descRestrictLower')
       const higher = document.getElementById('descRestrictHigher')
-      let spaceCount = 0
-      for (let char of this.formData.description) {
-        if (char == ' ') spaceCount+=1
-      }
-      if (spaceCount>=3) {
+  
+      if ((this.formData.description.trim().split(" ").length) > 3) {
         lower.style.color = 'green'
-      } else lower.style.color = '#777'
+      } else lower.style.color = 'red'
       if (this.formData.description.length > 255) {
         higher.style.color = 'red'
-      } else higher.style.color = '#777'
+      } else higher.style.color = 'green'
 
       if (this.formData.name.length > 2) {
         document.getElementById('titleLower').style.color = 'green'
-      } else document.getElementById('titleLower').style.color = '#777'
+      } else document.getElementById('titleLower').style.color = 'red'
       if (this.formData.name.length > 255) {
         document.getElementById('titleHigher').style.color = 'red'
-      } else document.getElementById('titleHigher').style.color = '#777'
+      } else document.getElementById('titleHigher').style.color = 'green'
+      this.wordCount = 0
+    },
+    openEmployeeModal() {
+      this.showEmployeeModal = true
+    },
+    handleEmployeeCreated() {
+      alert("Employee created!")
     }
   }
 }
 </script>
   
 <style>
+
+
 .page-title {
     position: relative;
     width: 1684px;
@@ -314,15 +393,15 @@ label {
 
 .form-department {
   position: relative;
-  width: 550px;
-  top: 0px;
+  width: 585px;
+  top: -12px;
   left: 0px;
   padding: 10px;
   font-size: 16px;
 }
 
 .form-department-select {
-  width: 550px;
+  width: 605px;
   height: 45px;
   padding: 10px;
   border: 1px solid #ddd;
@@ -334,6 +413,7 @@ label {
 
 .form-employee {
   position: relative;
+  top: 7px;
   width: 550px;
   height: 76px;
   padding: 10px;
@@ -343,12 +423,12 @@ label {
 
 .employee-wrapper {
   position: relative;
-  width: 550px;
+  width: 605px;
 }
 
 .custom-select-employee {
-  width: 259px;
-  height: 42px;
+  width: 585px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -373,6 +453,44 @@ label {
   max-height: 900px;
   overflow-y: auto;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+.employee-avatar {
+  position: relative;
+  margin-left: 5px;
+  margin-top: 5px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border-color: white;
+  border-width: 1px;
+}
+
+.selected-employee-avatar {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border-color: white;
+  border-width: 0.1;
+  border-style: solid;
+}
+
+.employee-name {
+  position: relative;
+  line-height: 0;
+  text-align: center;
+  top: -8px;
+  margin-left: 10px
+}
+
+.selected-employee-name {
+  position: absolute;
+  line-height: 0;
+  text-align: center;
+  margin-left: 10px;
+  left: 42px
 }
 
 .form-control {
@@ -392,11 +510,11 @@ label {
 
 .priority-wrapper {
   position: relative;
-  width: 278px;
+  width: 270px;
 }
 
 .custom-select {
-  width: 259px;
+  width: 251px;
   height: 42px;
   display: flex;
   align-items: center;
@@ -454,20 +572,26 @@ label {
   margin-right: 10px;
 }
 
+.priority-default {
+  position: absolute;
+  left: 40px;
+}
+
 .form-status {
   width: 259px;
   height: 48px;
   position: relative;
-  left: 350px;
+  left: 316px;
   top: -260px;
   padding: 0 10px;
-  background: #FFFFFF;
   font-size: 16px;
 }
 
 .form-status-select {
-  padding: 10px;
+  width: 251px;
+  height: 44px;
   border: 1px solid #ddd;
+  padding: 10px;
   border-radius: 4px;
   font-size: 16px;
   background-color: white;
@@ -500,8 +624,9 @@ textarea.form-control {
 .form-deadline-input {
   width: 318px;
   height: 44px;
-  border-radius: 5px;
-  border-width: 1px;
+  border: 1px solid #DEE2E6;
+  background: #FFFFFF;
+  border-radius: 4px;
 }
 
 .form-text {
@@ -535,9 +660,32 @@ textarea.form-control {
   padding-right: 20px;
   padding-bottom: 10px;
   padding-left: 20px;
+  transition: background-color 0.2s;
 }
 
 .submit-button:hover {
   background-color: #7020d9;
+}
+
+.employee-create-button {
+  width: 595px;
+  height: 39px;
+  border-radius: 5px;
+  border-width: 1px;
+  border: 1px solid hsl(0, 0%, 100%);
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0%;
+  color: #f0f0f0;
+  line-height: 100%;
+  background: #8338EC;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin: 5px;
+  padding: 5px
+}
+
+.employee-create-button:hover {
+  background: #985cff;
 }
 </style>
