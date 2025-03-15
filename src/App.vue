@@ -1,27 +1,49 @@
 <template>
-<div class="app">
+  <div class="app">
     <div class="nav-bar">
       <img @click="goToHome" class="nav-bar-image" src="./assets/Frame 1000006027.png">
       <div class="empasign-container">
-        <button class="employee-create">თანამშრომლის შექმნა</button>
-        <button class="assignment-create">+ შექმენი ახალი დავალება</button>
+        <button @click="showEmployeeModal = true" class="employee-create">თანამშრომლის შექმნა</button>
+        <button @click="goToAssignmentCreatePage" class="assignment-create">+ შექმენი ახალი დავალება</button>
       </div>
-      </div>
-      <router-view></router-view>
-</div>
+    </div>
+  
+    <EmployeeModal 
+      :showModal="showEmployeeModal" 
+      @close="showEmployeeModal = false"
+      @employee-created="handleEmployeeCreated"
+    />
+    
+    <router-view @open-employee-modal="openEmployeeModal"></router-view>
+  </div>
 </template>
 
 <script>
-import router from './router';
+import router from './router'
+import EmployeeModal from './components/EmployeeModal.vue'
 
 export default {
   name: "App",
+  components: {
+    EmployeeModal
+  },
   data() {
-
+    return {
+      showEmployeeModal: false
+    }
   },
   methods: {
     goToHome() {
       router.push('/')
+    },
+    goToAssignmentCreatePage() {
+      router.push('/createAssignment')
+    },
+    openEmployeeModal() {
+      this.showEmployeeModal = true
+    },
+    handleEmployeeCreated(employeeData) {
+      console.log('New employee created:', employeeData)
     }
   }
 }
@@ -130,4 +152,3 @@ body {
   background: #5c0fc7;
 }
 </style>
-

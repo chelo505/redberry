@@ -76,7 +76,7 @@
             :options="employees" 
             label="name" 
             track-by="id"
-            :multiple="true"
+            :multiple="false"
             :close-on-select="false"
             :clear-on-select="false"
             class="custom-multiselect-employee"
@@ -94,13 +94,19 @@
           </multiselect>
         </li>
       </ul>
-    </div>  
+    </div>
+    <div class="awaiting-start">
+      <h2>დასაწყები</h2>
+      <ul class="awaiting-start-grid"></ul>
+    </div> 
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import Multiselect from 'vue-multiselect'
+
+
 
 export default {
   components: { Multiselect },
@@ -161,7 +167,7 @@ export default {
   position: relative;
   width: 374px;
   height: 41px;
-  top: 140px;
+  top: 120px;
   left: 118px;
   font-weight: 600;
   font-size: 33px;
@@ -176,7 +182,7 @@ export default {
   justify-items: start;
   width: 688px;
   height: 44px;
-  top: 233px;
+  top: 160px;
   left: 120px;
   gap: 45px;
   border: 1px solid #DEE2E6;
@@ -228,21 +234,46 @@ export default {
   box-shadow: none;
 }
 
+.custom-multiselect-department .multiselect__select::before,
+.custom-multiselect-department .multiselect__select::before {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .custom-multiselect-department .multiselect__select {
   color: #8A2BE2;
   cursor: pointer;
-  height: 21px;
-  left: 118px
+  height: 20px;
+  left: 130px;
+  top: -1px;
+  width: 24px;
+  height: 24px;
+  background-image: url(/src/assets/Icon.svg);
 }
 
 .custom-multiselect-department .multiselect__option--highlight {
-  background-color: #8A2BE2;
+  background: #8338EC;
+}
+
+.multiselect__content {
+  border-style: solid;
+  border-radius: 10px;
+  border-width: 0.5px;
+  border-color: #8338EC;
 }
 
 .custom-multiselect-department .multiselect__content-wrapper {
   left: -23px;
   width: 688px;
-  border-radius: 10px;
+  overflow: visible;
+  position: absolute;
 }
 
 .custom-multiselect-priority {
@@ -260,11 +291,26 @@ export default {
   box-shadow: none;
 }
 
+.custom-multiselect-priority .multiselect__select::before {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .custom-multiselect-priority .multiselect__select {
-  color: #8A2BE2;
   cursor: pointer;
-  height: 21px;
-  left: 112px
+  height: 20px;
+  left: 122px;
+  top: -1px;
+  width: 24px;
+  height: 24px;
+  background-image: url(/src/assets/IconBlack.svg);
 }
 
 .custom-multiselect-priority .multiselect__option--highlight {
@@ -274,7 +320,8 @@ export default {
 .custom-multiselect-priority .multiselect__content-wrapper {
   left: -267px;
   width: 688px;
-  border-radius: 10px;
+  overflow: visible;
+  position: absolute;
 }
 
 .custom-multiselect-employee {
@@ -292,11 +339,26 @@ export default {
   box-shadow: none;
 }
 
+.custom-multiselect-employee .multiselect__select::before {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .custom-multiselect-employee .multiselect__select {
-  color: #8A2BE2;
   cursor: pointer;
-  height: 21px;
-  left: 125px
+  height: 20px;
+  left: 134px;
+  top: -1px;
+  width: 24px;
+  height: 24px;
+  background-image: url(/src/assets/IconBlack.svg);
 }
 
 .custom-multiselect-employee .multiselect__option--highlight {
@@ -306,7 +368,7 @@ export default {
 .custom-multiselect-employee .multiselect__content-wrapper {
   width: 688px;
   border-radius: 10px;
-  left: -512px
+  left: -512px;
 }
 
 .persistent-placeholder-department {
@@ -354,7 +416,8 @@ export default {
   bottom: 0;
   right: 0;
   z-index: 1;
-  cursor: default
+  cursor: default;
+  border-radius: 10px;
 }
 
 .submit-button {
@@ -376,5 +439,29 @@ export default {
   display: none !important;
   width: 0;
   height: 0;
+}
+
+.awaiting-start {
+  position: relative;
+  width: 381px;
+  height: 24px;
+  border-radius: 10px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  top: 210px;
+  left: 118px;
+  text-align: center;
+  justify-content: center;
+  background: #F7BC30;
+}
+
+.awaiting-start h2 {
+  width: 107;
+  height: 24;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: white
 }
 </style>
