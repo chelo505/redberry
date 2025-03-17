@@ -2,120 +2,42 @@
   <div class="app">
     <h2 class="assignment-page-title">დავალებების გვერდი</h2>
     <div>
-      <ul  class="drop-downs">
-        <li class="department-dropdown">
-          <multiselect
-            :max-height="274"
-            ref="departmentMultiselect" 
-            :searchable="false"
-            :hideSelected="false"
-            allowEmpty="true"
-            selectLabel=""
-            openDirection="bottom"
-            v-model="selectedDepartments" 
-            :options="departments" 
-            label="name" 
-            track-by="id"
-            :multiple="true"
-            :close-on-select="false"
-            :clear-on-select="false"
-            class="custom-multiselect-department"
-            :show-labels="false"
-            placeholder=""
-            >
-            <template  v-slot:selection="{}">
-              <span click.stop="toggleDropdown" class="persistent-placeholder-department">დეპარტამენტი</span>
-            </template>
-          <template v-slot:afterList>
-            <div class="submit-button-container">
-            <button class="submit-button" @click="departmentSubmitSelections">არჩევა</button>
-            </div>
-          </template>
-          </multiselect>
+      <ul class="drop-downs">
+        <li @click="showDepModal = true" class="department-dropdown">
+          <div>დეპარტამენტი</div>
+          <img :src="require('@/assets/Icon.svg')">
         </li>
-        <li class="priority-dropdown">
-          <multiselect
-            :max-height="274"
-            ref="priorityMultiselect" 
-            :searchable="false"
-            :hideSelected="false"
-            allowEmpty="true"
-            selectLabel=""
-            openDirection="bottom"
-            v-model="selectedPriorities" 
-            :options="priorities" 
-            label="name" 
-            track-by="id"
-            :multiple="true"
-            :close-on-select="false"
-            :clear-on-select="false"
-            class="custom-multiselect-priority"
-            :show-labels="false"
-            placeholder=""
-            >
-            <template  v-slot:selection="{}">
-              <span click.stop="toggleDropdown" class="persistent-placeholder-priorities">პრიორიტეტი</span>
-            </template>
-          <template v-slot:afterList>
-            <div class="submit-button-container">
-            <button class="submit-button" @click="prioritySubmitSelections">არჩევა</button>
-            </div>
-          </template>
-          </multiselect>
+        <li @click="showPrioModal = true" class="priority-dropdown">
+          <div>პრიორიტეტი</div>
+          <img :src="require('@/assets/IconBlack.svg')">
         </li>
-        <li class="employee-dropdown">
-          <multiselect
-            :max-height="274"
-            ref="employeeMultiselect" 
-            :searchable="false"
-            :hideSelected="false"
-            allowEmpty="true"
-            selectLabel=""
-            openDirection="bottom"
-            v-model="selectedEmployees" 
-            :options="employees" 
-            label="name" 
-            track-by="id"
-            :multiple="false"
-            :close-on-select="false"
-            :clear-on-select="false"
-            class="custom-multiselect-employee"
-            :show-labels="false"
-            placeholder=""
-            >
-            <template  v-slot:selection="{}">
-              <span click.stop="toggleDropdown" class="persistent-placeholder-priorities">თანამშრომელი</span>
-            </template>
-          <template v-slot:afterList>
-            <div class="submit-button-container">
-            <button class="submit-button" @click="employeeSubmitSelections">არჩევა</button>
-            </div>
-          </template>
-          </multiselect>
+        <li @click="showCustomModal = true" class="employee-dropdown">
+          <div>თანამშრომელი</div>
+          <img :src="require('@/assets/IconBlack.svg')">
         </li>
       </ul>
     </div>
     <div class="awaiting-start">
       <h2>დასაწყები</h2>
       <ul class="awaiting-start-grid">
-        <li v-for="task in awaitingStart" v-bind:key="task.id" class="awaiting-start-task">
-          <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
-          <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
-          <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
-          <span class="task-department">{{ task.department.name.split(' ')[0] }}</span>
-          <span class="task-deadline">{{ formatDateToGeorgian(task.due_date.split('T')[0]) }}</span>
-          <span class="task-title">{{ task.name }}</span>
-          <span class="task-description">{{ task.description }}</span>
-          <img :src="require('@/assets/Comments.png')" class="task-comments-icon">
-          <span class="task-comments">{{ task.total_comments }}</span>
-          <img class="task-employee-avatar" :src="task.employee.avatar">
+        <li v-for="task in awaitingStart" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="awaiting-start-task">
+            <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
+            <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
+            <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
+            <span class="task-department">{{ task.department.name.split(' ')[0] }}</span>
+            <span class="task-deadline">{{ formatDateToGeorgian(task.due_date.split('T')[0]) }}</span>
+            <span class="task-title">{{ task.name }}</span>
+            <span class="task-description">{{ task.description }}</span>
+            <img :src="require('@/assets/Comments.png')" class="task-comments-icon">
+            <span class="task-comments">{{ task.total_comments }}</span>
+            <img class="task-employee-avatar" :src="task.employee.avatar">
         </li>
       </ul>
     </div>
     <div class="inprogress-start">
       <h2>პროგრესში</h2>
       <ul class="inprogress-start-grid">
-        <li v-for="task in inProgress" v-bind:key="task.id" class="inprogress-start-task">
+        <li v-for="task in inProgress" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="inprogress-start-task">
           <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
           <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
           <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
@@ -132,7 +54,7 @@
     <div class="readyfortest-start">
       <h2>მზად ტესტირებისთვის</h2>
       <ul class="readyfortest-start-grid">
-        <li v-for="task in inProgress" v-bind:key="task.id" class="readyfortest-start-task">
+        <li v-for="task in readyForTesting" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="readyfortest-start-task">
           <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
           <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
           <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
@@ -149,71 +71,102 @@
     <div class="done-start">
       <h2>დასრულებული</h2>
       <ul class="done-start-grid">
-        <li v-for="task in inProgress" v-bind:key="task.id" class="done-start-task">
-          <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
-          <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
-          <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
-          <span class="task-department">{{ task.department.name.split(' ')[0] }}</span>
-          <span class="task-deadline">{{ formatDateToGeorgian(task.due_date.split('T')[0]) }}</span>
-          <span class="task-title">{{ task.name }}</span>
-          <span class="task-description">{{ task.description }}</span>
-          <img :src="require('@/assets/Comments.png')" class="task-comments-icon">
-          <span class="task-comments">{{ task.total_comments }}</span>
-          <img class="task-employee-avatar" :src="task.employee.avatar">
+        <li v-for="task in done" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="done-start-task">
+            <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
+            <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
+            <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
+            <span class="task-department">{{ task.department.name.split(' ')[0] }}</span>
+            <span class="task-deadline">{{ formatDateToGeorgian(task.due_date.split('T')[0]) }}</span>
+            <span class="task-title">{{ task.name }}</span>
+            <span class="task-description">{{ task.description }}</span>
+            <img :src="require('@/assets/Comments.png')" class="task-comments-icon">
+            <span class="task-comments">{{ task.total_comments }}</span>
+            <img class="task-employee-avatar" :src="task.employee.avatar">
         </li>
       </ul>
     </div>   
   </div>
+  <Transition>
+    <DepartmentsModal 
+      :isVisible="showDepModal" 
+      @close="showDepModal = false"
+      @submit="getDepFilters"
+    />
+  </Transition>
+  <Transition>
+    <PrioritiesModal 
+      :isVisible="showPrioModal" 
+      @close="showPrioModal = false"
+      @submit="getPrioFilters"
+    />
+  </Transition>
 </template>
 
 <script>
 import axios from 'axios'
-import Multiselect from 'vue-multiselect'
-
-
+import DepartmentsModal from '@/components/DepartmentsDropdownModal.vue'
+import PrioritiesModal from './PrioritiesDropdownModal.vue'
 
 export default {
-  components: { Multiselect },
+  components: {
+    DepartmentsModal,
+    PrioritiesModal
+  },
   data() {
     return {
-      departments: [],
-      priorities: [],
-      employees: [],
+      filters: {
+        departments: [],
+        priorities: [],
+        employees: []
+      },
       awaitingStart: [],
       inProgress: [],
       readyForTesting: [],
       done: [],
-      selectedDepartments: [],
-      selectedPriorities: [],
-      selectedEmployees: [],
-      token: "9e6af86e-8086-496a-8001-5919972b5772"
+      token: "9e6af86e-8086-496a-8001-5919972b5772",
+      showDepModal: false,
+      showPrioModal: false,
+      showEmployeeModal: false
     }
   },
   created() {
-    this.fetchDepartmentData()
-    this.fetchPrioritiesData()
-    this.fetchEmployeesData()
     this.fetchTaskData()
   },
   methods: {
-    async fetchDepartmentData() {
-      const response = await axios("https://momentum.redberryinternship.ge/api/departments")
-      .catch(error => console.log(error))
-      this.departments = response.data
+    getDepFilters(filters) {
+      this.filters.departments = []
+      this.filters.departments = filters
     },
-    async fetchPrioritiesData() {
-      const response = await axios("https://momentum.redberryinternship.ge/api/priorities")
-      .catch(error => console.log(error))
-      this.priorities = response.data
+    getPrioFilters(filters) {
+      this.filters.priorities = []
+      this.filters.priorities = filters
     },
-    async fetchEmployeesData() {
-      const response = await axios("https://momentum.redberryinternship.ge/api/employees/", {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      }).catch(error => console.log(error))
-      this.employees = response.data
-    },
+    shouldDisplayTask(task) {
+    if (this.filters.departments.length == 0 && this.filters.priorities.length == 0 && this.filters.employees == 0) {
+      return true
+    }
+    if (this.filters.departments.length > 0 && this.filters.priorities.length == 0 && this.filters.employees.length == 0) {
+      return this.filters.departments.includes(task.department.id)
+    }
+    if (this.filters.priorities.length > 0 && this.filters.departments.length == 0 && this.filters.employees.length == 0) {
+      return this.filters.priorities.includes(task.priority.id)
+    }
+    if (this.filters.employees.length > 0 && this.filters.departments.length == 0 && this.filters.priorities.length == 0) {
+      return this.filters.employees.includes(task.employee.id)
+    }
+    if (this.filters.departments.length > 0 && this.filters.priorities.length > 0) {
+      return this.filters.departments.includes(task.department.id)&&this.filters.priorities.includes(task.priority.id)
+    }
+    if (this.filters.priorities.length > 0 && this.filters.employees.length > 0) {
+      return this.filters.employees.includes(task.employee.id)&&this.filters.priorities.includes(task.priority.id)
+    }
+    if (this.filters.departments.length > 0 && this.filters.employees.length > 0) {
+      return this.filters.departments.includes(task.department.id)&&this.filters.employees.includes(task.employee.id)
+    }
+    if (this.filters.departments.length > 0 && this.filters.employees.length > 0 && this.filters.priorities.length > 0) {
+      return this.filters.departments.includes(task.department.id)&&this.filters.priorities.includes(task.priority.id)&&this.filters.employees.includes(task.employee.id)
+    }
+  },
     async fetchTaskData() {
       const response = await axios("https://momentum.redberryinternship.ge/api/tasks/", {
         headers: {
@@ -227,19 +180,6 @@ export default {
         if (task.status.id == 4) this.done.push(task)
       }
     },
-    toggleDropdown(event) {
-      event.stopPropagation()
-      this.$refs.multiselect.toggle()
-    },
-    departmentSubmitSelections() {
-      this.$refs.departmentMultiselect.toggle()
-    },
-    prioritySubmitSelections() {
-      this.$refs.priorityMultiselect.toggle()
-    },
-    employeeSubmitSelections() {
-      this.$refs.employeeMultiselect.toggle()
-    },
     formatDateToGeorgian(dateString) {
     const date = new Date(dateString)
     const day = date.getDate()
@@ -250,7 +190,7 @@ export default {
       'ივლ', 'აგვ', 'სექ', 'ოქტ', 'ნოე', 'დეკ'
     ]
     return `${day} ${georgianMonths[month]}, ${year}`
-  }
+  },
   }
 }
 </script>
@@ -269,6 +209,7 @@ export default {
 }
 
 .drop-downs {
+  list-style: none;
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -283,255 +224,90 @@ export default {
 }
 
 .department-dropdown {
-  list-style: none;
-  width: 119px;
-  height: 19px;
-  padding-top: 13px;
-  padding-right: 18px;
-  padding-bottom: 10px;
-  padding-left: 25px;
+  width: 199px;
+  height: 44px;
+  border-radius: 5px;
+  margin-left: 5px
 }
 
 .priority-dropdown {
-  list-style: none;
-  width: 119px;
-  height: 19px;
-  padding-top: 13px;
-  padding-right: 18px;
-  padding-bottom: 10px;
-  padding-left: 25px;
+  width: 199px;
+  height: 44px;
+  border-radius: 5px;
+  margin-left: 5px
 }
 
 .employee-dropdown {
-  list-style: none;
+  width: 199px;
+  height: 44px;
+  border-radius: 5px;
+  margin-left: 5px
+}
+
+.department-dropdown div {
   width: 119px;
   height: 19px;
-  padding-top: 13px;
-  padding-right: 18px;
-  padding-bottom: 10px;
-  padding-left: 25px;
-}
-
-.custom-multiselect-department {
-  position: relative;
-  width: 132px;
-  background: white;
-  min-height: 0px;
-  height: 20px;
-}
-
-.custom-multiselect-department .multiselect__tags {
-  position: relative;
-  border: none;
-  background: none;
-  box-shadow: none;
-}
-
-.custom-multiselect-department .multiselect__select::before,
-.custom-multiselect-department .multiselect__select::before {
-  display: none !important;
-  content: none !important;
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  border-style: none !important;
-  position: absolute !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.custom-multiselect-department .multiselect__select {
-  color: #8A2BE2;
-  cursor: pointer;
-  height: 20px;
-  left: 130px;
-  top: -1px;
-  width: 24px;
-  height: 24px;
-  background-image: url(/src/assets/Icon.svg);
-}
-
-.custom-multiselect-department .multiselect__option--highlight {
-  background: #8338EC;
-}
-
-.multiselect__content {
-  border-style: solid;
-  border-radius: 10px;
-  border-width: 0.5px;
-  border-color: #8338EC;
-}
-
-.custom-multiselect-department .multiselect__content-wrapper {
-  left: -23px;
-  width: 688px;
-  overflow: visible;
-  position: absolute;
-}
-
-.custom-multiselect-priority {
-  position: relative;
-  width: 132px;
-  background: white;
-  min-height: 0px;
-  height: 20px;
-}
-
-.custom-multiselect-priority .multiselect__tags {
-  position: relative;
-  border: none;
-  background: none;
-  box-shadow: none;
-}
-
-.custom-multiselect-priority .multiselect__select::before {
-  display: none !important;
-  content: none !important;
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  border-style: none !important;
-  position: absolute !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.custom-multiselect-priority .multiselect__select {
-  cursor: pointer;
-  height: 20px;
-  left: 122px;
-  top: -1px;
-  width: 24px;
-  height: 24px;
-  background-image: url(/src/assets/IconBlack.svg);
-}
-
-.custom-multiselect-priority .multiselect__option--highlight {
-  background-color: #8A2BE2;
-}
-
-.custom-multiselect-priority .multiselect__content-wrapper {
-  left: -267px;
-  width: 688px;
-  overflow: visible;
-  position: absolute;
-}
-
-.custom-multiselect-employee {
-  position: relative;
-  width: 132px;
-  background: white;
-  min-height: 0px;
-  height: 20px;
-}
-
-.custom-multiselect-employee .multiselect__tags {
-  position: relative;
-  border: none;
-  background: none;
-  box-shadow: none;
-}
-
-.custom-multiselect-employee .multiselect__select::before {
-  display: none !important;
-  content: none !important;
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  border-style: none !important;
-  position: absolute !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.custom-multiselect-employee .multiselect__select {
-  cursor: pointer;
-  height: 20px;
-  left: 134px;
-  top: -1px;
-  width: 24px;
-  height: 24px;
-  background-image: url(/src/assets/IconBlack.svg);
-}
-
-.custom-multiselect-employee .multiselect__option--highlight {
-  background-color: #8A2BE2;
-}
-
-.custom-multiselect-employee .multiselect__content-wrapper {
-  width: 688px;
-  border-radius: 10px;
-  left: -512px;
-}
-
-.persistent-placeholder-department {
-  width: 119px;
-  height: 19px;
-  color: #8A2BE2;
-  font-weight: 500;
-  display: block !important;
-  opacity: 1 !important;
-  position: relative;
-  pointer-events: auto;
-  cursor: pointer;
-  user-select: none;
   font-weight: 400;
   font-size: 16px;
-  line-height: 0;
+  line-height: 100%;
   letter-spacing: 0%;
   text-align: center;
+  color: #8338EC;
+  margin-top: 13px;
+  margin-left: 15px
 }
 
-.persistent-placeholder-priorities {
+.priority-dropdown div {
   width: 119px;
   height: 19px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
   color: #0D0F10;
-  font-weight: 500;
-  display: block !important;
-  opacity: 1 !important;
-  position: relative;
-  pointer-events: auto;
-  cursor: pointer;
-  user-select: none;
+  margin-top: 13px;
+  margin-left: 15px
+}
+
+.employee-dropdown div {
+  width: 119px;
+  height: 19px;
   font-weight: 400;
   font-size: 16px;
-  line-height: 0;
+  line-height: 100%;
   letter-spacing: 0%;
   text-align: center;
+  color: #0D0F10;
+  margin-top: 13px;
+  margin-left: 15px
 }
 
-.submit-button-container {
-  width: 100%;
-  padding: 10px;
-  text-align: right;
-  background: white;
-  position: sticky;
-  bottom: 0;
-  right: 0;
-  z-index: 1;
-  cursor: default;
-  border-radius: 10px;
+.department-dropdown img {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin-left: 140px;
+  margin-bottom: 80px;
+  top: 10px
 }
 
-.submit-button {
-  width: 155px;
-  height: 35px;
-  border-radius: 20px;
-  padding-top: 8px;
-  padding-right: 20px;
-  padding-bottom: 8px;
-  padding-left: 20px;
-  background: #8338EC;
-  cursor: pointer;
-  border: 0;
-  color: white;
-  font-weight: 500;
+.priority-dropdown img {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin-left: 132px;
+  margin-bottom: 80px;
+  top: 10px
 }
 
-.empty-tag {
-  display: none !important;
-  width: 0;
-  height: 0;
+.employee-dropdown img {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin-left: 145px;
+  margin-bottom: 80px;
+  top: 10px
 }
 
 .awaiting-start-grid {
@@ -674,7 +450,7 @@ export default {
   display: grid;
   list-style: none;
   width: 340px;
-  height: 150px;
+  height: 176px;
   border-radius: 15px;
   margin-top: 35px;
   margin-bottom: 20px;
@@ -689,7 +465,7 @@ export default {
   display: grid;
   list-style: none;
   width: 340px;
-  height: 150px;
+  height: 176px;
   border-radius: 15px;
   margin-top: 35px;
   margin-bottom: 20px;
@@ -704,7 +480,7 @@ export default {
   display: grid;
   list-style: none;
   width: 340px;
-  height: 150px;
+  height: 176px;
   border-radius: 15px;
   margin-top: 35px;
   margin-bottom: 20px;
@@ -719,7 +495,7 @@ export default {
   display: grid;
   list-style: none;
   width: 340px;
-  height: 150px;
+  height: 176px;
   border-radius: 15px;
   margin-top: 35px;
   margin-bottom: 20px;
@@ -774,6 +550,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
+  max-height: 23px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -792,6 +569,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
+  max-height: 23px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -810,6 +588,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
+  max-height: 23px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -828,6 +607,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
+  max-height: 23px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -864,7 +644,7 @@ export default {
 
 .awaiting-start-task .task-department {
   margin-left: 100px;
-  margin-top: -31px;
+  margin-top: -35px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -878,7 +658,7 @@ export default {
 
 .inprogress-start-task .task-department {
   margin-left: 100px;
-  margin-top: -31px;
+  margin-top: -35px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -892,7 +672,7 @@ export default {
 
 .readyfortest-start-task .task-department {
   margin-left: 100px;
-  margin-top: -31px;
+  margin-top: -35px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -906,7 +686,7 @@ export default {
 
 .done-start-task .task-department {
   margin-left: 100px;
-  margin-top: -31px;
+  margin-top: -35px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -922,7 +702,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -25px;
+  margin-top: -32px;
   font-size: 13px;
 }
 
@@ -930,7 +710,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -25px;
+  margin-top: -32px;
   font-size: 13px;
 }
 
@@ -938,7 +718,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -25px;
+  margin-top: -32px;
   font-size: 13px;
 }
 
@@ -946,28 +726,28 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -25px;
+  margin-top: -32px;
   font-size: 13px;
 }
 
 .awaiting-start-task .task-comments-icon {
   margin-left: 320px;
-  margin-top: 27px
+  margin-top: 50px
 }
 
 .inprogress-start-task .task-comments-icon {
   margin-left: 320px;
-  margin-top: 27px
+  margin-top: 50px
 }
 
 .readyfortest-start-task .task-comments-icon {
   margin-left: 320px;
-  margin-top: 27px
+  margin-top: 50px
 }
 
 .done-start-task .task-comments-icon {
   margin-left: 320px;
-  margin-top: 27px
+  margin-top: 50px
 }
 
 .awaiting-start-task .task-comments {

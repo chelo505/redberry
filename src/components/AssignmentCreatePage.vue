@@ -224,6 +224,7 @@ export default {
       return [`${selectedEmployee.name} ${selectedEmployee.surname}`, selectedEmployee.avatar]
     },
     updateEmployees() {
+      this.formData.employees = null
       this.selectedDepEmployees = []
       this.departmentSelected = true
       for (let employee of this.employees) {
@@ -270,7 +271,7 @@ export default {
         isValid = false
       }
       
-      if ((this.formData.description.length > 1 && (this.formData.description.trim().split(" ").length) <= 3) || this.formData.description.length > 255) {
+      if ((this.formData.description.length > 0 && (this.formData.description.trim().split(" ").length) <= 3) || this.formData.description.length > 255) {
         isValid = false
       }
       
@@ -317,9 +318,6 @@ export default {
         document.getElementById('titleHigher').style.color = 'red'
       } else document.getElementById('titleHigher').style.color = 'green'
       this.wordCount = 0
-    },
-    openEmployeeModal() {
-      this.showEmployeeModal = true
     },
     handleEmployeeCreated() {
       alert("Employee created!")

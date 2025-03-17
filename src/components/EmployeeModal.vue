@@ -69,7 +69,7 @@
         <div class="field-group">
           <label for="department">დეპარტამენტი*</label>
           <div class="select-container" :class="{ 'error-border': errors.department }">
-            <select @change="console.log(typeof(department))" id="department" v-model="department">
+            <select id="department" v-model="department">
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
@@ -155,7 +155,6 @@ export default {
       this.avatar = file
       this.createPreview(file)
       this.errors.avatar = false
-      console.log(this.avatar)
     },
     createPreview(file) {
       const reader = new FileReader()
