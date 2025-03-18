@@ -3,11 +3,12 @@
       <div class="modal-container">
         <div class="modal-content">
           <div class="checkbox-group">
-            <div v-for="prio in priorities" v-bind:key="prio.id" class="checkbox-item">
+            <div v-for="emp in employees" v-bind:key="emp.id" class="checkbox-item">
               <label class="custom-checkbox-label">
-                <input id="checkbox" type="checkbox" :checked="filter.includes(prio)" @change="addToFilter(prio, $event)">
+                <input id="checkbox" type="checkbox" :checked="tempFilter.includes(emp)" @change="addToFilter(emp, $event)">
                 <span class="custom-checkbox"></span>
-                <span class="label-text">{{ prio.name }}</span>
+                <img :src="emp.avatar" class="employee-avatar">
+                <span class="label-text">{{ emp.name }} {{ emp.surname }}</span>
               </label>
             </div>
           </div>
@@ -23,7 +24,7 @@
   import axios from 'axios'
   
   export default {
-    name: 'PrioritiesModal',
+    name: 'EmployeesModal',
     props: {
       isVisible: {
         type: Boolean,
@@ -34,23 +35,28 @@
       return {
         tempFilter: [],
         filter: [],
-        priorities: []
+        employees: [],
+        token: "9e6af86e-8086-496a-8001-5919972b5772",
       }
     },
     created() {
-      this.fetchPrioritiesData()
+      this.fetchEmployeesData()
     },
     methods: {
-      async fetchPrioritiesData() {
-        const response = await axios("https://momentum.redberryinternship.ge/api/priorities")
+      async fetchEmployeesData() {
+        const response = await axios("https://momentum.redberryinternship.ge/api/employees", {
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        })
         .catch(error => console.log(error))
-        this.priorities = response.data
+        this.employees = response.data
       },
-      addToFilter(prio, event) {
+      addToFilter(emp, event) {
         if (event.target.checked) {
-          this.tempFilter.push(prio.id)
+          this.tempFilter.push(`${emp.name} ${emp.surname}`)
         } else {
-          this.tempFilter = this.tempFilter.filter(e => e != prio.id)
+          this.tempFilter = this.tempFilter.filter(e => e != emp.id)
         }
       },
       closeModal() {
@@ -133,7 +139,7 @@
     height: 22px;
     width: 22px;
     background-color: #fff;
-    border: 1.5px solid rgb(26, 26, 26);
+    border: 1.5px solid #8338EC;
     border-radius: 6px;
   }
   
@@ -145,7 +151,7 @@
     top: 3px;
     width: 6px;
     height: 12px;
-    border: solid #333;
+    border: solid #8338EC;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
   }
@@ -185,5 +191,11 @@
   
   .submit-button:hover {
     background-color: #6e1be2;
+  }
+
+  .employee-avatar {
+    position: inherit;
+    width: 32px;
+    height: 32px;
   }
   </style>

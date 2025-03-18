@@ -98,7 +98,7 @@
 
 <script>
 import axios from 'axios'
-import EmployeeModal from './EmployeeModal.vue'
+import EmployeeModal from '../modals/EmployeeModal.vue'
 
 export default {
   components: {
@@ -135,6 +135,7 @@ export default {
     this.fetchPrioritiesData()
     this.fetchEmployeesData()
     this.fetchStatusesData()
+    this.formData.deadline = this.getTomorrowDate()
     
     document.addEventListener('click', this.handleClickOutside)
     document.addEventListener('click', this.handleClickOutsideEmp)
@@ -193,7 +194,7 @@ export default {
         this.showIcons = false
       }
     },
-    handleClickOutsideEmp(event) {
+    async handleClickOutsideEmp(event) {
       const dropdown = document.querySelector('.employee-wrapper')
       if (dropdown && !dropdown.contains(event.target)) {
         this.showAvatars = false
@@ -210,7 +211,7 @@ export default {
     getSelectedPriorityName() {
       if (!this.formData.priority) {
         return [this.defaultPrio.name, this.defaultPrio.icon]
-      }
+      } 
       
       const selectedPriority = this.priorities.find(p => p.id === this.formData.priority)
       return [selectedPriority ? selectedPriority.name : this.defaultPrio.name, selectedPriority.icon]
@@ -218,10 +219,10 @@ export default {
     getSelectedEmployeeName() {
       if (!this.formData.employees) {
         return ""
-      }
-
+      } else {
       const selectedEmployee = this.employees.find(e => e.id === this.formData.employees)
       return [`${selectedEmployee.name} ${selectedEmployee.surname}`, selectedEmployee.avatar]
+      }
     },
     updateEmployees() {
       this.formData.employees = null
@@ -275,17 +276,7 @@ export default {
         isValid = false
       }
       
-      if (!this.formData.status) {
-        isValid = false
-      }
       
-      if (!this.formData.priority) {
-        isValid = false
-      }
-      
-      if (!this.formData.department) {
-        isValid = false
-      }
       
       if (!this.formData.employees) {
         isValid = false
@@ -319,8 +310,17 @@ export default {
       } else document.getElementById('titleHigher').style.color = 'green'
       this.wordCount = 0
     },
-    handleEmployeeCreated() {
+    async handleEmployeeCreated() {
       alert("Employee created!")
+    },
+    getTomorrowDate() {
+      const today = new Date(Date.now())
+      const tomorrow = new Date(today)
+      tomorrow.setDate(today.getDate() + 1)
+      const year = tomorrow.getFullYear();
+      const month = String(tomorrow.getMonth() + 1).padStart(2, '0')
+      const day = String(tomorrow.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     }
   }
 }
@@ -330,23 +330,23 @@ export default {
 
 
 .page-title {
-    position: relative;
-    width: 1684px;
-    height: 41px;
-    top: 140px;
-    left: 118px;
+  position: relative;
+  width: 1684px;
+  height: 41px;
+  top: 140px;
+  left: 118px;
 }
 
 .form-container {
-    position: relative;
-    width: 1684px;
-    height: 650px;
-    top: 160px;
-    left: 118px;
-    border-radius: 4px;
-    border-width: 0.3px;
-    border: 0.3px solid #DDD2FF;
-    background: #FBF9FFA6;
+  position: relative;
+  width: 1684px;
+  height: 650px;
+  top: 160px;
+  left: 118px;
+  border-radius: 4px;
+  border-width: 0.3px;
+  border: 0.3px solid #DDD2FF;
+  background: #FBF9FFA6;
 }
 
 label {
@@ -358,26 +358,26 @@ label {
 }
 
 .form-left-container {
-    position: relative;
-    width: 550px;
-    height: 674px;
-    top: 65px;
-    left: 55px;
-    gap: 55px;
+  position: relative;
+  width: 550px;
+  height: 674px;
+  top: 65px;
+  left: 55px;
+  gap: 55px;
 }
 
 .form-right-container {
-    position: relative;
-    width: 550px;
-    height: 674px;
-    top: -609px;
-    left: 800px;;
-    gap: 55px;
+  position: relative;
+  width: 550px;
+  height: 674px;
+  top: -609px;
+  left: 800px;;
+  gap: 55px;
 }
 
 .form-title {
-    width: 550px;
-    height: 108px;
+  width: 550px;
+  height: 108px;
 }
 
 .form-title-select {

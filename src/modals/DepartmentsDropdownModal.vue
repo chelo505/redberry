@@ -5,7 +5,7 @@
         <div class="checkbox-group">
           <div v-for="dep in departments" v-bind:key="dep.id" class="checkbox-item">
             <label class="custom-checkbox-label">
-              <input id="checkbox" type="checkbox" :checked="filter.includes(dep)" @change="addToFilter(dep, $event)">
+              <input id="checkbox" type="checkbox" :checked="tempFilter.includes(dep)" @change="addToFilter(dep, $event)">
               <span class="custom-checkbox"></span>
               <span class="label-text">{{ dep.name }}</span>
             </label>
@@ -48,9 +48,7 @@ export default {
     },
     addToFilter(dep, event) {
       if (event.target.checked) {
-        this.tempFilter.push(dep.id)
-      } else {
-        this.tempFilter = this.tempFilter.filter(e => e != dep.id)
+        this.tempFilter.push(dep.name)
       }
     },
     closeModal() {
@@ -133,7 +131,7 @@ export default {
   height: 22px;
   width: 22px;
   background-color: #fff;
-  border: 1.5px solid rgb(26, 26, 26);
+  border: 1.5px solid #8338EC;
   border-radius: 6px;
 }
 
@@ -145,7 +143,7 @@ export default {
   top: 3px;
   width: 6px;
   height: 12px;
-  border: solid #333;
+  border: solid #8338EC;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }

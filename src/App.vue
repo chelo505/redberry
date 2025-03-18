@@ -20,7 +20,7 @@
 
 <script>
 import router from './router'
-import EmployeeModal from './components/EmployeeModal.vue'
+import EmployeeModal from './modals/EmployeeModal.vue'
 
 export default {
   name: "App",
@@ -37,6 +37,8 @@ export default {
       router.push('/')
     },
     goToAssignmentCreatePage() {
+      localStorage.setItem('prioFilters', [])
+      localStorage.setItem('depFilters', [])
       router.push('/createAssignment')
     },
     openEmployeeModal() {

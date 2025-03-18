@@ -11,16 +11,22 @@
           <div>პრიორიტეტი</div>
           <img :src="require('@/assets/IconBlack.svg')">
         </li>
-        <li @click="showCustomModal = true" class="employee-dropdown">
+        <li @click="showEmpModal = true" class="employee-dropdown">
           <div>თანამშრომელი</div>
           <img :src="require('@/assets/IconBlack.svg')">
+        </li>
+        <button @click="resetFilters" class="clear-filters-button">ფილტრების გაწმენდა</button>
+      </ul>
+      <ul class="filters">
+        <li v-for="(emp) in filters.employees" v-bind:key="emp.id">
+          <span>{{console.log(emp)}}</span>
         </li>
       </ul>
     </div>
     <div class="awaiting-start">
       <h2>დასაწყები</h2>
       <ul class="awaiting-start-grid">
-        <li v-for="task in awaitingStart" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="awaiting-start-task">
+        <li v-for="task in awaitingStart" v-bind:key="task.id" @click="goToInnerPage(task.id)" v-show="shouldDisplayTask(task)" class="awaiting-start-task">
             <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
             <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
             <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
@@ -37,7 +43,7 @@
     <div class="inprogress-start">
       <h2>პროგრესში</h2>
       <ul class="inprogress-start-grid">
-        <li v-for="task in inProgress" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="inprogress-start-task">
+        <li v-for="task in inProgress" v-bind:key="task.id" @click="goToInnerPage(task.id)" v-show="shouldDisplayTask(task)" class="inprogress-start-task">
           <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
           <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
           <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
@@ -54,7 +60,7 @@
     <div class="readyfortest-start">
       <h2>მზად ტესტირებისთვის</h2>
       <ul class="readyfortest-start-grid">
-        <li v-for="task in readyForTesting" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="readyfortest-start-task">
+        <li v-for="task in readyForTesting" v-bind:key="task.id" @click="goToInnerPage(task.id)" v-show="shouldDisplayTask(task)" class="readyfortest-start-task">
           <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
           <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
           <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
@@ -71,7 +77,7 @@
     <div class="done-start">
       <h2>დასრულებული</h2>
       <ul class="done-start-grid">
-        <li v-for="task in done" v-bind:key="task.id" v-show="shouldDisplayTask(task)" class="done-start-task">
+        <li v-for="task in done" v-bind:key="task.id" @click="goToInnerPage(task.id)" v-show="shouldDisplayTask(task)" class="done-start-task">
             <img v-if="task.priority.id==1" :src="require('@/assets/low.png')" class="task-priority-icon">
             <img v-if="task.priority.id==2" :src="require('@/assets/medium.png')" class="task-priority-icon">
             <img v-if="task.priority.id==3" :src="require('@/assets/high.png')" class="task-priority-icon">
@@ -100,17 +106,27 @@
       @submit="getPrioFilters"
     />
   </Transition>
+  <Transition>
+    <EmployeesModal 
+      :isVisible="showEmpModal" 
+      @close="showEmpModal = false"
+      @submit="getEmployeeFilters"
+    />
+  </Transition>
 </template>
 
 <script>
 import axios from 'axios'
-import DepartmentsModal from '@/components/DepartmentsDropdownModal.vue'
-import PrioritiesModal from './PrioritiesDropdownModal.vue'
+import DepartmentsModal from '@/modals/DepartmentsDropdownModal.vue'
+import PrioritiesModal from '../modals/PrioritiesDropdownModal.vue'
+import EmployeesModal from '@/modals/EmployeeDropdownModal.vue'
+import router from '@/router'
 
 export default {
   components: {
     DepartmentsModal,
-    PrioritiesModal
+    PrioritiesModal,
+    EmployeesModal
   },
   data() {
     return {
@@ -126,47 +142,75 @@ export default {
       token: "9e6af86e-8086-496a-8001-5919972b5772",
       showDepModal: false,
       showPrioModal: false,
-      showEmployeeModal: false
+      showEmpModal: false
     }
   },
   created() {
+    this.loadFiltersFromStorage()
     this.fetchTaskData()
   },
   methods: {
+    loadFiltersFromStorage() {
+      this.filters.departments = localStorage.getItem('depFilters') 
+        ? JSON.parse(localStorage.getItem('depFilters')) 
+        : []
+      this.filters.priorities = localStorage.getItem('prioFilters') 
+        ? JSON.parse(localStorage.getItem('prioFilters')) 
+        : []
+        this.filters.employees = localStorage.getItem('empFilters') 
+        ? JSON.parse(localStorage.getItem('empFilters')) 
+        : []
+    },
     getDepFilters(filters) {
       this.filters.departments = []
       this.filters.departments = filters
+      localStorage.setItem('depFilters', JSON.stringify(this.filters.departments))
     },
     getPrioFilters(filters) {
       this.filters.priorities = []
       this.filters.priorities = filters
+      localStorage.setItem('prioFilters', JSON.stringify(this.filters.priorities))
+    },
+    getEmployeeFilters(filters) {
+      this.filters.employees = []
+      this.filters.employees = filters
+      localStorage.setItem('empFilters', JSON.stringify(this.filters.employees))
     },
     shouldDisplayTask(task) {
-    if (this.filters.departments.length == 0 && this.filters.priorities.length == 0 && this.filters.employees == 0) {
+    const { departments, priorities, employees } = this.filters
+
+    if (departments.length === 0 && priorities.length === 0 && employees.length === 0) {
       return true
     }
-    if (this.filters.departments.length > 0 && this.filters.priorities.length == 0 && this.filters.employees.length == 0) {
-      return this.filters.departments.includes(task.department.id)
+    if (departments.length > 0 && priorities.length === 0 && employees.length === 0) {
+      return departments.includes(task.department.name)
     }
-    if (this.filters.priorities.length > 0 && this.filters.departments.length == 0 && this.filters.employees.length == 0) {
-      return this.filters.priorities.includes(task.priority.id)
+    if (priorities.length > 0 && departments.length === 0 && employees.length === 0) {
+      return priorities.includes(task.priority.name)
     }
-    if (this.filters.employees.length > 0 && this.filters.departments.length == 0 && this.filters.priorities.length == 0) {
-      return this.filters.employees.includes(task.employee.id)
+    if (employees.length > 0 && departments.length === 0 && priorities.length === 0) {
+      const taskFullName = `${task.employee.name} ${task.employee.surname}`
+      return employees.includes(taskFullName)
     }
-    if (this.filters.departments.length > 0 && this.filters.priorities.length > 0) {
-      return this.filters.departments.includes(task.department.id)&&this.filters.priorities.includes(task.priority.id)
+    if (departments.length > 0 && priorities.length > 0 && employees.length === 0) {
+      return departments.includes(task.department.name) && priorities.includes(task.priority.name)
     }
-    if (this.filters.priorities.length > 0 && this.filters.employees.length > 0) {
-      return this.filters.employees.includes(task.employee.id)&&this.filters.priorities.includes(task.priority.id)
+    if (priorities.length > 0 && employees.length > 0 && departments.length === 0) {
+      const taskFullName = `${task.employee.name} ${task.employee.surname}`
+      return employees.includes(taskFullName) && priorities.includes(task.priority.name)
     }
-    if (this.filters.departments.length > 0 && this.filters.employees.length > 0) {
-      return this.filters.departments.includes(task.department.id)&&this.filters.employees.includes(task.employee.id)
+    if (departments.length > 0 && employees.length > 0 && priorities.length === 0) {
+      const taskFullName = `${task.employee.name} ${task.employee.surname}`
+      return departments.includes(task.department.name) && employees.includes(taskFullName)
     }
-    if (this.filters.departments.length > 0 && this.filters.employees.length > 0 && this.filters.priorities.length > 0) {
-      return this.filters.departments.includes(task.department.id)&&this.filters.priorities.includes(task.priority.id)&&this.filters.employees.includes(task.employee.id)
+    if (departments.length > 0 && employees.length > 0 && priorities.length > 0) {
+      const taskFullName = `${task.employee.name} ${task.employee.surname}`
+      return departments.includes(task.department.name) && 
+              priorities.includes(task.priority.name) && 
+              employees.includes(taskFullName)
     }
-  },
+    return false
+    },
     async fetchTaskData() {
       const response = await axios("https://momentum.redberryinternship.ge/api/tasks/", {
         headers: {
@@ -191,10 +235,30 @@ export default {
     ]
     return `${day} ${georgianMonths[month]}, ${year}`
   },
+  resetFilters() {
+    this.filters.departments = []
+    this.filters.priorities = []
+    this.filters.employees = []
+    localStorage.setItem('prioFilters', [])
+    localStorage.setItem('depFilters', [])
+    localStorage.setItem('empFilters', [])
+  },
+  goToInnerPage(task) {
+    router.push({
+      path: '/assignmentPage',
+      query: {
+        task: task
+      }
+    }
+  )
+    localStorage.setItem('prioFilters', [])
+    localStorage.setItem('depFilters', [])
+    localStorage.setItem('empFilters', [])
+  }
   }
 }
 </script>
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
 <style>
 .assignment-page-title {
   position: relative;
@@ -206,6 +270,7 @@ export default {
   font-size: 33px;
   line-height: 100%;
   letter-spacing: 0%;
+  user-select: none;
 }
 
 .drop-downs {
@@ -221,27 +286,31 @@ export default {
   gap: 45px;
   border: 1px solid #DEE2E6;
   border-radius: 10px;
+  user-select: none;
 }
 
 .department-dropdown {
   width: 199px;
   height: 44px;
   border-radius: 5px;
-  margin-left: 5px
+  margin-left: 5px;
+  cursor: pointer
 }
 
 .priority-dropdown {
   width: 199px;
   height: 44px;
   border-radius: 5px;
-  margin-left: 5px
+  margin-left: 5px;
+  cursor: pointer
 }
 
 .employee-dropdown {
   width: 199px;
   height: 44px;
   border-radius: 5px;
-  margin-left: 5px
+  margin-left: 5px;
+  cursor: pointer
 }
 
 .department-dropdown div {
@@ -359,6 +428,7 @@ export default {
   justify-content: center;
   background: #F7BC30;
   grid-template-rows: auto;
+  user-select: none;
 }
 
 .inprogress-start {
@@ -374,6 +444,7 @@ export default {
   justify-content: center;
   background: #FB5607;
   grid-template-rows: auto;
+  user-select: none;
 }
 
 .readyfortest-start {
@@ -389,6 +460,7 @@ export default {
   justify-content: center;
   background: var(--Pink, #FF006E);
   grid-template-rows: auto;
+  user-select: none;
 }
 
 .done-start {
@@ -404,6 +476,7 @@ export default {
   justify-content: center;
   background: #3A86FF;
   grid-template-rows: auto;
+  user-select: none;
 }
 
 .awaiting-start h2 {
@@ -459,6 +532,24 @@ export default {
   background: #FFFFFF;
   border: 1px solid #F7BC30;
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.awaiting-start-task:hover {
+  transform: translate(-5px, -5px);
+}
+
+.inprogress-start-task:hover {
+  transform: translate(-5px, -5px);
+}
+
+.readyfortest-start-task:hover {
+  transform: translate(-5px, -5px);
+}
+
+.done-start-task:hover {
+  transform: translate(-5px, -5px);
 }
 
 .inprogress-start-task {
@@ -474,6 +565,8 @@ export default {
   background: #FFFFFF;
   border: 1px solid #FB5607;
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .readyfortest-start-task {
@@ -489,6 +582,8 @@ export default {
   background: #FFFFFF;
   border: 1px solid var(--Pink, #FF006E);
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .done-start-task {
@@ -504,42 +599,68 @@ export default {
   background: #FFFFFF;
   border: 1px solid #3A86FF;
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .awaiting-start-task .task-title {
   width: 320px;
-  height: 18px;
+  height: 17px;
   padding: 5px;
   font-weight: 600;
   text-align: left;
   margin-left: 30px;
+  line-clamp: unset;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inprogress-start-task .task-title {
   width: 320px;
-  height: 18px;
+  height: 17px;
   padding: 5px;
   font-weight: 600;
   text-align: left;
   margin-left: 30px;
+  line-clamp: unset;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .readyfortest-start-task .task-title {
   width: 320px;
-  height: 18px;
+  height: 17px;
   padding: 5px;
   font-weight: 600;
   text-align: left;
   margin-left: 30px;
+  line-clamp: unset;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .done-start-task .task-title {
   width: 320px;
-  height: 18px;
+  height: 17px;
   padding: 5px;
   font-weight: 600;
   text-align: left;
   margin-left: 30px;
+  line-clamp: unset;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .awaiting-start-task .task-description {
@@ -550,7 +671,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
-  max-height: 23px;
+  max-height: 23.5px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -569,7 +690,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
-  max-height: 23px;
+  max-height: 23.5px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -588,7 +709,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
-  max-height: 23px;
+  max-height: 23.5px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -607,7 +728,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 320px;
-  max-height: 23px;
+  max-height: 23.5px;
   margin-top: 10px;
   text-align: left;
   margin-left: 30px;
@@ -800,5 +921,35 @@ export default {
   height: 31px;
   margin-top: -29px;
   margin-left: 10px
+}
+
+.clear-filters-button {
+  position: absolute;
+  right: -185px;
+  top: 7px;
+  height: 30px;
+  background-color: #8338EC;
+  border: 0;
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  font-size: 14px;
+  line-height: 0;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.clear-filters-button:hover {
+  background-color: #6416d1;
+}
+
+.filters {
+  list-style: none;
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  right: 200px;
+  top: 100px
 }
 </style>
