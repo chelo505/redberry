@@ -18,8 +18,17 @@
         <button @click="resetFilters" class="clear-filters-button">ფილტრების გაწმენდა</button>
       </ul>
       <ul class="filters">
-        <li v-for="(emp) in filters.employees" v-bind:key="emp.id">
-          <span>{{console.log(emp)}}</span>
+        <li v-for="dep in filters.departments" v-bind:key="dep.id" class="department-filter">
+          <span>{{ dep }}</span>
+          <img @click="removeFromFilterDep(dep)" :src="require('@/assets/x.png')" class="dep-x">
+        </li>
+        <li v-for="prio in filters.priorities" v-bind:key="prio.id" class="priority-filter">
+          <span>{{ prio }}</span>
+          <img @click="removeFromFilterPrio(prio)" :src="require('@/assets/x.png')" class="dep-x">
+        </li>
+        <li v-if="filters.employees.length > 0" class="employee-filter">
+          <span>{{ this.filters.employees }}</span>
+          <img @click="removeEmployeesFilter" :src="require('@/assets/x.png')" class="dep-x">
         </li>
       </ul>
     </div>
@@ -139,17 +148,30 @@ export default {
       inProgress: [],
       readyForTesting: [],
       done: [],
-      token: "9e6af86e-8086-496a-8001-5919972b5772",
+      token: "9e75ea39-cb24-4933-bcbc-2640b97d99f4",
       showDepModal: false,
       showPrioModal: false,
       showEmpModal: false
     }
   },
-  created() {
+  beforeMount() {
     this.loadFiltersFromStorage()
     this.fetchTaskData()
   },
   methods: {
+    async fetchTaskData() {
+      const response = await axios("https://momentum.redberryinternship.ge/api/tasks/", {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      }).catch(err => console.log(err))
+      for (let task of response.data) {
+        if (task.status.id == 1) this.awaitingStart.push(task)
+        if (task.status.id == 2) this.inProgress.push(task)
+        if (task.status.id == 3) this.readyForTesting.push(task)
+        if (task.status.id == 4) this.done.push(task)
+      }
+    },
     loadFiltersFromStorage() {
       this.filters.departments = localStorage.getItem('depFilters') 
         ? JSON.parse(localStorage.getItem('depFilters')) 
@@ -211,22 +233,9 @@ export default {
     }
     return false
     },
-    async fetchTaskData() {
-      const response = await axios("https://momentum.redberryinternship.ge/api/tasks/", {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      }).catch(err => console.log(err))
-      for (let task of response.data) {
-        if (task.status.id == 1) this.awaitingStart.push(task)
-        if (task.status.id == 2) this.inProgress.push(task)
-        if (task.status.id == 3) this.readyForTesting.push(task)
-        if (task.status.id == 4) this.done.push(task)
-      }
-    },
     formatDateToGeorgian(dateString) {
     const date = new Date(dateString)
-    const day = date.getDate()
+    const day = date.getDate() + 1
     const month = date.getMonth()
     const year = date.getFullYear()
     const georgianMonths = [
@@ -253,6 +262,18 @@ export default {
   )
     localStorage.setItem('prioFilters', [])
     localStorage.setItem('depFilters', [])
+    localStorage.setItem('empFilters', [])
+  },
+  removeFromFilterDep(dep) {
+    this.filters.departments = this.filters.departments.filter(d => d != dep)
+    localStorage.setItem('depFilters', JSON.stringify(this.filters.departments))
+  },
+  removeFromFilterPrio(prio) {
+    this.filters.priorities = this.filters.priorities.filter(p => p != prio)
+    localStorage.setItem('prioFilters', JSON.stringify(this.filters.priorities))
+  },
+  removeEmployeesFilter() {
+    this.filters.employees = []
     localStorage.setItem('empFilters', [])
   }
   }
@@ -765,7 +786,7 @@ export default {
 
 .awaiting-start-task .task-department {
   margin-left: 100px;
-  margin-top: -35px;
+  margin-top: -32px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -779,7 +800,7 @@ export default {
 
 .inprogress-start-task .task-department {
   margin-left: 100px;
-  margin-top: -35px;
+  margin-top: -32px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -793,7 +814,7 @@ export default {
 
 .readyfortest-start-task .task-department {
   margin-left: 100px;
-  margin-top: -35px;
+  margin-top: -32px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -807,7 +828,7 @@ export default {
 
 .done-start-task .task-department {
   margin-left: 100px;
-  margin-top: -35px;
+  margin-top: -32px;
   width: 108px;
   height: 24px;
   font-weight: 400;
@@ -823,7 +844,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -32px;
+  margin-top: -25px;
   font-size: 13px;
 }
 
@@ -831,7 +852,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -32px;
+  margin-top: -25px;
   font-size: 13px;
 }
 
@@ -839,7 +860,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -32px;
+  margin-top: -25px;
   font-size: 13px;
 }
 
@@ -847,7 +868,7 @@ export default {
   width: 76px;
   height: 14px;
   margin-left: 250px;
-  margin-top: -32px;
+  margin-top: -25px;
   font-size: 13px;
 }
 
@@ -945,11 +966,95 @@ export default {
 }
 
 .filters {
+  gap: 8px;
   list-style: none;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  top: 258px;
+  left: 120px;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.department-filter {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #707070;
+  padding: 2.5px 10px;
+  border-radius: 12px;
+  letter-spacing: 0%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 22px;
+  margin-right: 5px;
+  border: 1px solid #CED4DA;
+  user-select: none;
+}
+
+.priority-filter {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #707070;
+  padding: 2.5px 10px;
+  border-radius: 12px;
+  letter-spacing: 0%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 22px;
+  margin-right: 5px;
+  border: 1px solid #CED4DA;
+  user-select: none;
+}
+
+.employee-filter {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #707070;
+  padding: 2.5px 10px;
+  border-radius: 12px;
+  letter-spacing: 0%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 22px;
+  margin-right: 5px;
+  border: 1px solid #CED4DA;
+  user-select: none;
+}
+
+.dep-x {
   position: relative;
-  display: grid;
-  grid-template-rows: repeat(3, 1fr);
-  right: 200px;
-  top: 100px
+  width: 14px;
+  height: 14px;
+  top: 3px;
+  left: 4px;
+  cursor: pointer;
+}
+
+.dep-x {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  top: 3px;
+  left: 4px;
+  cursor: pointer;
+}
+
+.dep-x {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  top: 3px;
+  left: 4px;
+  cursor: pointer;
 }
 </style>

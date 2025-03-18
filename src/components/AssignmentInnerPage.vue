@@ -52,7 +52,7 @@
                     <img :src="comment.author_avatar" class="commenter-avatar">
                     <span class="commenter-name">{{ comment.author_nickname }}</span>
                     <span class="comment-text">{{ comment.text }}</span>
-                    <img @click="comment.replying = !comment.replying" :src="require('@/assets/reply.png')" class="reply-button">
+                    <img @click="replying(comment)" :src="require('@/assets/reply.png')" class="reply-button">
                     <textarea v-if="comment.replying" maxlength="255" v-model="replyText" class="reply-area"></textarea>
                     <button @click="sendReply(comment)" v-if="comment.replying" class="submit-reply">პასუხი</button>
                     <button @click="cancelReply(comment)" v-if="comment.replying" class="cancel-reply">გაუქმება</button>
@@ -76,7 +76,7 @@ export default {
     data() {
         return {
             task: this.$route.query.task,
-            token: "9e6af86e-8086-496a-8001-5919972b5772",
+            token: "9e75ea39-cb24-4933-bcbc-2640b97d99f4",
             taskData: null,
             statuses: [],
             defaultStatus: null,
@@ -159,7 +159,7 @@ export default {
     },
     convertDateFormat(inputDate) {
         const date = new Date(inputDate)
-        const day = date.getDate()
+        const day = date.getDate() + 1
         const month = date.getMonth() + 1
         const year = date.getFullYear()
         const weekday = date.getDay()
@@ -208,6 +208,13 @@ export default {
         await this.fetchCommentsData()
         await this.fetchAllTaskData() 
         } else alert('ცარიელ პასუხს ვერ დაამატებთ')
+    },
+    replying(comment) {
+        comment.replying = !comment.replying
+        setTimeout(() => {
+            const area = document.getElementsByClassName('reply-area')[0]
+            area.focus()
+            }, 5) 
     }         
     }
 }

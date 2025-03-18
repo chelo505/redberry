@@ -2,88 +2,128 @@
   <div class="app">
       <h1 class="page-title">შექმენი ახალი დავალება</h1>
       <div class="form-container">
-      <form @submit.prevent="submitForm">
-      <div class="form-left-container">
-        <div class="form-title">
-        <label>სათაური*</label>
-        <input @input="checkMoreThan" type="text" v-model="formData.name" class="form-title-select" required>
-        <small id="titleLower" class="form-text" style="color: red">მინიმუმ 3 სიმბოლო</small>
-        <small id="titleHigher" class="form-text" style="color: green">მაქსიმუმ 255 სიმბოლო</small>
-      </div>
-      <div class="form-description">
-        <label>აღწერა</label>
-        <textarea @input="checkMoreThan" v-model="formData.description" class="form-control"></textarea>
-        <small id="descRestrictLower" class="form-text" style="color: red">მინიმუმ 4 სიტყვა</small>
-        <small id="descRestrictHigher" class="form-text" style="color: green">მაქსიმუმ 255 სიმბოლო</small>
-      </div>
-      <div class="form-priority">
-          <label>პრიორიტეტი*</label>
-          <div class="priority-wrapper">
-            <div class="custom-select" @click="toggleIcons">
-              <img class='priority-icon-default' :src="getSelectedPriorityName()[1]">
-              <span class="priority-default">{{ getSelectedPriorityName()[0] }}</span>
-              <img class="dropdown-arrow" :src="require('@/assets/IconBlack.svg')">
+        <form @submit.prevent="submitForm">
+        <div class="form-left-container">
+          <div class="form-title field-group">
+            <label>სათაური*</label>
+            <input 
+              @input="checkMoreThan" 
+              type="text" 
+              v-model="formData.name" 
+              class="form-title-select" 
+              :class="{ 'error-border': errors.name }"
+            >
+            <div class="requirements">
+              <small class="requirement" :class="{ 'valid': formData.name.length >= 3 }">
+                <span class="check-icon">✔️</span> მინიმუმ 3 სიმბოლო
+              </small>
+              <small class="requirement" :class="{ 'valid': formData.name.length <= 255 }">
+                <span class="check-icon">✔️</span> მაქსიმუმ 255 სიმბოლო
+              </small>
             </div>
-            <div v-show="showIcons" class="priority-icons-container">
-              <div 
-                v-for="prio in priorities" 
-                :key="prio.id" 
-                class="priority-item"
-                @click="selectPriority(prio.id)"
-              >
-                <img :src="prio.icon" class="priority-icon">
-                <span>{{ prio.name }}</span>
+          </div>
+          <div class="form-description field-group">
+            <label>აღწერა</label>
+            <textarea 
+              @input="checkMoreThan" 
+              v-model="formData.description" 
+              class="form-control"
+              :class="{ 'error-border': errors.description }"
+            ></textarea>
+            <div class="requirements">
+              <small class="requirement" :class="{ 'valid': descriptionWordCount >= 4 }">
+                <span class="check-icon">✔️</span> მინიმუმ 4 სიტყვა
+              </small>
+              <small class="requirement" :class="{ 'valid': formData.description.length <= 255 }">
+                <span class="check-icon">✔️</span> მაქსიმუმ 255 სიმბოლო
+              </small>
+            </div>
+          </div>
+          <div class="form-priority field-group">
+            <label>პრიორიტეტი*</label>
+            <div class="priority-wrapper" :class="{ 'error-border': errors.priority }">
+              <div class="custom-select" @click="toggleIcons">
+                <img class='priority-icon-default' :src="getSelectedPriorityName()[1]">
+                <span class="priority-default">{{ getSelectedPriorityName()[0] }}</span>
+                <img class="dropdown-arrow" :src="require('@/assets/IconBlack.svg')">
+              </div>
+              <div v-show="showIcons" class="priority-icons-container">
+                <div 
+                  v-for="prio in priorities" 
+                  :key="prio.id" 
+                  class="priority-item"
+                  @click="selectPriority(prio)"
+                >
+                  <img :src="prio.icon" class="priority-icon">
+                  <span>{{ prio.name }}</span>
+                </div>
               </div>
             </div>
           </div>
+          <div class="form-status field-group">
+            <label>სტატუსი*</label>
+            <select 
+              @change="saveStatus" 
+              v-model="formData.status" 
+              class="form-status-select"
+              :class="{ 'error-border': errors.status }"
+            >
+              <option v-for="s in statuses" :key="s.id" :value="s.id">
+                {{ s.name }}
+              </option>
+            </select>
+          </div>
         </div>
-        <div class="form-status">
-          <label>სტატუსი*</label>
-          <select :selected="defaultStatus.id" v-model="formData.status" class="form-status-select">
-            <option v-for="s in statuses" :key="s.id" :value="s.id">
-              {{ s.name }}
-            </option>
-          </select>
-        </div>
-    </div>
-    <div class="form-right-container">
-        <div class="form-department">
-        <label>დეპარტამენტი*</label>
-        <select @change="updateEmployees" v-model="formData.department" class="form-department-select" required>
-            <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-            {{ dept.name }}
-            </option>
-        </select>
-        </div>
-        <div v-show="departmentSelected" class="form-employee">
-        <label>პასუხისმგებელი თანამშრომელი*</label>
-        <div class="employee-wrapper">
-            <div class="custom-select-employee" @click="toggleAvatars">
-              <img :src="getSelectedEmployeeName()[1]" class="selected-employee-avatar">
-              <span class="selected-employee-name">{{ getSelectedEmployeeName()[0] }}</span>
-              <img class="dropdown-arrow" :src="require('@/assets/IconBlack.svg')">
-            </div>
-            <div v-show="showAvatars" class="employee-avatars-container">
-              <button @click="showEmployeeModal = true" class="employee-create-button">თანამშრომლის შექმნა</button>
-              <div 
-                v-for="emp in selectedDepEmployees" 
-                :key="emp.id" 
-                @click="selectEmployee(emp.id)"
-              >
-                <img :src="emp.avatar" class="employee-avatar">
-                <span class="employee-name">{{ emp.name+" " }} {{ emp.surname }}</span>
+        <div class="form-right-container">
+          <div class="form-department field-group">
+            <label>დეპარტამენტი*</label>
+            <select 
+              @change="updateEmployees" 
+              v-model="formData.department" 
+              class="form-department-select" 
+              :class="{ 'error-border': errors.department }"
+
+            >
+              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
+          </div>
+          <div v-show="departmentSelected" class="form-employee field-group">
+            <label>პასუხისმგებელი თანამშრომელი*</label>
+            <div class="employee-wrapper">
+              <div class="custom-select-employee" @click="toggleAvatars" :class="{ 'error-border': errors.employees }">
+                <img :src="getSelectedEmployeeName()[1]" class="selected-employee-avatar">
+                <span class="selected-employee-name">{{ getSelectedEmployeeName()[0] }}</span>
+                <img class="dropdown-arrow" :src="require('@/assets/IconBlack.svg')">
+              </div>
+              <div v-show="showAvatars" class="employee-avatars-container">
+                <button @click="showEmployeeModal = true" class="employee-create-button">თანამშრომლის შექმნა</button>
+                <div 
+                  v-for="emp in selectedDepEmployees" 
+                  :key="emp.id" 
+                  @click="selectEmployee(emp.id)"
+                >
+                  <img :src="emp.avatar" class="employee-avatar">
+                  <span class="employee-name">{{ emp.name + " " }} {{ emp.surname }}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="form-deadline">
+          <div class="form-deadline field-group">
             <label>დედლაინი*</label>
-            <input type="date" v-model="formData.deadline" class="form-deadline-input" required>
-        </div>
-        <div class="button-container">
+            <input 
+              @change="validateDate" 
+              type="date" 
+              v-model="formData.deadline" 
+              class="form-deadline-input" 
+              :class="{ 'error-border': errors.deadline }"         
+            >
+          </div>
+          <div class="button-container">
             <button @click="submitForm" type="submit" class="submit-button">დავალების შექმნა</button>
+          </div>
         </div>
-      </div>
       </form>
     </div>
   </div>
@@ -99,6 +139,7 @@
 <script>
 import axios from 'axios'
 import EmployeeModal from '../modals/EmployeeModal.vue'
+import router from '@/router'
 
 export default {
   components: {
@@ -115,6 +156,15 @@ export default {
         deadline: '',
         employees: '',
       },
+      errors: {
+        name: false,
+        description: false,
+        priority: false,
+        status: false,
+        department: false,
+        employees: false,
+        deadline: false
+      },
       departments: [],
       priorities: [],
       employees: [],
@@ -122,7 +172,7 @@ export default {
       statuses: [],
       departmentSelected: false,
       selectedDepartment: null,
-      token: "9e6af86e-8086-496a-8001-5919972b5772",
+      token: "9e75ea39-cb24-4933-bcbc-2640b97d99f4",
       defaultPrio: '',
       defaultStatus: '',
       showIcons: false,
@@ -135,14 +185,32 @@ export default {
     this.fetchPrioritiesData()
     this.fetchEmployeesData()
     this.fetchStatusesData()
-    this.formData.deadline = this.getTomorrowDate()
-    
+    if (localStorage.getItem('department'))
+      this.formData.department = JSON.parse(localStorage.getItem('department'))
+    if (localStorage.getItem('depSelected'))
+      this.departmentSelected = JSON.parse(localStorage.getItem('depSelected'))
+    if (localStorage.getItem('employee'))
+      this.formData.employees = JSON.parse(localStorage.getItem('employee'))
+    if (localStorage.getItem('selectedDepEmployees'))
+      this.selectedDepEmployees = JSON.parse(localStorage.getItem('selectedDepEmployees'))
+    if (localStorage.getItem('name'))
+      this.formData.name = JSON.parse(localStorage.getItem('name'))
+    if (localStorage.getItem('desc'))
+      this.formData.description = JSON.parse(localStorage.getItem('desc'))
+    if (localStorage.getItem('deadline'))
+      this.formData.deadline = JSON.parse(localStorage.getItem('deadline'))
+    else this.formData.deadline = this.getTomorrowDate()
     document.addEventListener('click', this.handleClickOutside)
     document.addEventListener('click', this.handleClickOutsideEmp)
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
     document.removeEventListener('click', this.handleClickOutsideEmp)
+  },
+  computed: {
+    descriptionWordCount() {
+      return this.formData.description.trim().split(" ").filter(word => word.length > 0).length
+    }
   },
   methods: {
     async fetchDepartmentData() {
@@ -157,7 +225,9 @@ export default {
       for (let prio of this.priorities) {
         if (prio.name == 'საშუალო') {
           this.defaultPrio = prio
-          this.formData.priority = prio.id
+          if (localStorage.getItem('priority'))
+            this.formData.priority = JSON.parse(localStorage.getItem('priority'))
+          else  this.formData.priority = this.defaultPrio
         }
       }
     },
@@ -176,7 +246,9 @@ export default {
       for (let stat of this.statuses) {
         if (stat.name == 'დასაწყები') {
           this.defaultStatus = stat
-          this.formData.status = stat.id
+          if (localStorage.getItem('status'))
+            this.formData.status = JSON.parse(localStorage.getItem('status'))
+          else this.formData.status = this.defaultStatus.id
         }
       }
     },
@@ -201,38 +273,58 @@ export default {
       }
     },
     selectPriority(priorityId) {
-      this.formData.priority = priorityId
+      localStorage.setItem('priority', JSON.stringify(priorityId))
+      this.formData.priority = JSON.parse(localStorage.getItem('priority'))
       this.showIcons = false
     },
     selectEmployee(employeeId) {
-      this.formData.employees = employeeId
+      localStorage.setItem('employee', JSON.stringify(employeeId))
+      this.formData.employees = JSON.parse(localStorage.getItem('employee'))
       this.showAvatars = false
     },
     getSelectedPriorityName() {
-      if (!this.formData.priority) {
+      if (!localStorage.getItem('priority')) {
         return [this.defaultPrio.name, this.defaultPrio.icon]
-      } 
+      }
       
-      const selectedPriority = this.priorities.find(p => p.id === this.formData.priority)
-      return [selectedPriority ? selectedPriority.name : this.defaultPrio.name, selectedPriority.icon]
+      const priority = JSON.parse(localStorage.getItem('priority')).id
+      const selectedPriority = this.priorities.find(p => p.id == priority)
+      return [
+        selectedPriority ? selectedPriority.name : this.defaultPrio.name, 
+        selectedPriority ? selectedPriority.icon : this.defaultPrio.icon
+      ]
+    },
+    saveStatus() {
+      localStorage.setItem('status', JSON.stringify(this.formData.status))
     },
     getSelectedEmployeeName() {
-      if (!this.formData.employees) {
-        return ""
+      if (!localStorage.getItem('employee')) {
+        return ["", ""]
       } else {
-      const selectedEmployee = this.employees.find(e => e.id === this.formData.employees)
-      return [`${selectedEmployee.name} ${selectedEmployee.surname}`, selectedEmployee.avatar]
+        const employeeId = JSON.parse(localStorage.getItem('employee'))
+        const selectedEmployee = this.employees.find(e => e.id == employeeId)
+        if (selectedEmployee) {
+          return [`${selectedEmployee.name} ${selectedEmployee.surname}`, selectedEmployee.avatar]
+        } else {
+          return ["", ""]
+        }
       }
     },
     updateEmployees() {
+      localStorage.setItem('department', JSON.stringify(this.formData.department))
+      localStorage.setItem('depSelected', JSON.stringify(this.departmentSelected))
+      localStorage.setItem('employee', [])
+      localStorage.setItem('selectedDepEmployees', [])
       this.formData.employees = null
       this.selectedDepEmployees = []
       this.departmentSelected = true
+      localStorage.setItem('depSelected', JSON.stringify(this.departmentSelected))
       for (let employee of this.employees) {
         if (employee.department.id == this.formData.department) {
           this.selectedDepEmployees.push(employee)
         }
       }
+      localStorage.setItem('selectedDepEmployees', JSON.stringify(this.selectedDepEmployees))
     },
     submitForm() {
       if (this.validateForm()) {
@@ -242,7 +334,7 @@ export default {
         formData.append('due_date', this.formData.deadline)
         formData.append('status_id', this.formData.status)
         formData.append('employee_id', this.formData.employees)
-        formData.append('priority_id', this.formData.priority)
+        formData.append('priority_id', this.formData.priority.id)
         
         axios.post("https://momentum.redberryinternship.ge/api/tasks/", formData, {
           headers: {
@@ -250,40 +342,81 @@ export default {
             'Content-Type': 'multipart/form-data'
           }
         }).catch(error => console.log(error))
-        
         this.$emit('employee-created', formData)
-        alert("Task has been created!")
         this.resetForm()
+        setTimeout(() => {
+          router.push('/')
+        }, 50)  
       }
     },
     resetForm() {
       this.formData.name = ''
-      this.formData.deadline = ''
+      this.formData.deadline = this.getTomorrowDate()
       this.formData.description = ''
       this.formData.department = ''
       this.formData.employees = ''
       this.formData.status = this.defaultStatus.id
       this.formData.priority = this.defaultPrio.id
+      localStorage.setItem('priority', [])
+      localStorage.setItem('status', [])
+      localStorage.setItem('employee', [])
+      localStorage.setItem('department', [])
+      localStorage.setItem('depSelected', [])
+      localStorage.setItem('selectedDepEmployees', [])
+      localStorage.setItem('name', [])
+      localStorage.setItem('desc', [])
+      localStorage.setItem('deadline', [])
     },
     validateForm() {
       let isValid = true
-      
+
       if (!this.formData.name || this.formData.name.length < 3 || this.formData.name.length > 255) {
+        this.errors.name = true
         isValid = false
+      } else {
+        this.errors.name = false
       }
-      
-      if ((this.formData.description.length > 0 && (this.formData.description.trim().split(" ").length) <= 3) || this.formData.description.length > 255) {
+
+      if (this.formData.description && (this.descriptionWordCount < 4 || this.formData.description.length > 255)) {
+        this.errors.description = true
         isValid = false
+      } else {
+        this.errors.description = false
       }
-      
-      
-      
+
+      if (!this.formData.priority) {
+        this.errors.priority = true
+        isValid = false
+      } else {
+        this.errors.priority = false
+      }
+
+      if (!this.formData.status) {
+        this.errors.status = true
+        isValid = false
+      } else {
+        this.errors.status = false
+      }
+
+      if (!this.formData.department) {
+        this.errors.department = true
+        isValid = false
+      } else {
+        this.errors.department = false
+      }
+
       if (!this.formData.employees) {
+        this.errors.employees = true
         isValid = false
+      } else {
+        this.errors.employees = false
       }
-      
-      if (!this.formData.deadline) {
+
+      if (!this.formData.deadline || !this.checkDateIsValid(this.formData.deadline)) {
+        this.errors.deadline = true
         isValid = false
+      } else {
+        this.errors.deadline = false
       }
 
       return isValid
@@ -292,23 +425,8 @@ export default {
         this.departmentSelected = !this.departmentSelected
     },
     checkMoreThan() {
-      const lower = document.getElementById('descRestrictLower')
-      const higher = document.getElementById('descRestrictHigher')
-  
-      if ((this.formData.description.trim().split(" ").length) > 3) {
-        lower.style.color = 'green'
-      } else lower.style.color = 'red'
-      if (this.formData.description.length > 255) {
-        higher.style.color = 'red'
-      } else higher.style.color = 'green'
-
-      if (this.formData.name.length > 2) {
-        document.getElementById('titleLower').style.color = 'green'
-      } else document.getElementById('titleLower').style.color = 'red'
-      if (this.formData.name.length > 255) {
-        document.getElementById('titleHigher').style.color = 'red'
-      } else document.getElementById('titleHigher').style.color = 'green'
-      this.wordCount = 0
+      localStorage.setItem('name', JSON.stringify(this.formData.name))
+      localStorage.setItem('desc', JSON.stringify(this.formData.description))
     },
     async handleEmployeeCreated() {
       alert("Employee created!")
@@ -321,6 +439,23 @@ export default {
       const month = String(tomorrow.getMonth() + 1).padStart(2, '0')
       const day = String(tomorrow.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
+    },
+    checkDateIsValid(selectedDate) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const dateToCheck = new Date(selectedDate)
+      return dateToCheck >= today
+    },
+    validateDate() {
+      if (this.formData.deadline == '')
+        this.formData.deadline = this.getTomorrowDate()
+      if (!this.checkDateIsValid(this.formData.deadline)) {
+        alert("დედლაინი არ შეიძლება იყოს წარსულში.");
+         if (localStorage.getItem('deadline')) 
+          this.formData.deadline = JSON.parse(localStorage.getItem('deadline'))
+        else this.formData.deadline = this.getTomorrowDate()
+      }
+      localStorage.setItem('deadline', JSON.stringify(this.formData.deadline))
     }
   }
 }
@@ -685,5 +820,33 @@ textarea.form-control {
 
 .employee-create-button:hover {
   background: #985cff;
+}
+
+.error-border {
+  border-color: #ff4d4f !important;
+}
+
+.requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.requirement {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.check-icon {
+  margin-right: 4px;
+  opacity: 0.5;
+}
+
+.valid .check-icon {
+  opacity: 1;
+  color: green;
 }
 </style>

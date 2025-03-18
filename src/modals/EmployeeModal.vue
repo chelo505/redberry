@@ -114,7 +114,7 @@ export default {
         avatar: false,
         department: false
       },
-      token: "9e6af86e-8086-496a-8001-5919972b5772"
+      token: "9e75ea39-cb24-4933-bcbc-2640b97d99f4"
     }
   },
   mounted() {
@@ -141,7 +141,7 @@ export default {
     onFileChange(event) {
       const file = event.target.files[0]
       if (!file) return
-      
+  
       if (!file.type.includes('image/')) {
         alert('გთხოვთ აირჩიოთ სურათის ფაილი')
         return
