@@ -185,20 +185,20 @@ export default {
     this.fetchPrioritiesData()
     this.fetchEmployeesData()
     this.fetchStatusesData()
-    if (localStorage.getItem('department'))
-      this.formData.department = JSON.parse(localStorage.getItem('department'))
-    if (localStorage.getItem('depSelected'))
-      this.departmentSelected = JSON.parse(localStorage.getItem('depSelected'))
-    if (localStorage.getItem('employee'))
-      this.formData.employees = JSON.parse(localStorage.getItem('employee'))
-    if (localStorage.getItem('selectedDepEmployees'))
-      this.selectedDepEmployees = JSON.parse(localStorage.getItem('selectedDepEmployees'))
-    if (localStorage.getItem('name'))
-      this.formData.name = JSON.parse(localStorage.getItem('name'))
-    if (localStorage.getItem('desc'))
-      this.formData.description = JSON.parse(localStorage.getItem('desc'))
-    if (localStorage.getItem('deadline'))
-      this.formData.deadline = JSON.parse(localStorage.getItem('deadline'))
+    if (sessionStorage.getItem('department'))
+      this.formData.department = JSON.parse(sessionStorage.getItem('department'))
+    if (sessionStorage.getItem('depSelected'))
+      this.departmentSelected = JSON.parse(sessionStorage.getItem('depSelected'))
+    if (sessionStorage.getItem('employee'))
+      this.formData.employees = JSON.parse(sessionStorage.getItem('employee'))
+    if (sessionStorage.getItem('selectedDepEmployees'))
+      this.selectedDepEmployees = JSON.parse(sessionStorage.getItem('selectedDepEmployees'))
+    if (sessionStorage.getItem('name'))
+      this.formData.name = JSON.parse(sessionStorage.getItem('name'))
+    if (sessionStorage.getItem('desc'))
+      this.formData.description = JSON.parse(sessionStorage.getItem('desc'))
+    if (sessionStorage.getItem('deadline'))
+      this.formData.deadline = JSON.parse(sessionStorage.getItem('deadline'))
     else this.formData.deadline = this.getTomorrowDate()
     document.addEventListener('click', this.handleClickOutside)
     document.addEventListener('click', this.handleClickOutsideEmp)
@@ -225,8 +225,8 @@ export default {
       for (let prio of this.priorities) {
         if (prio.name == 'საშუალო') {
           this.defaultPrio = prio
-          if (localStorage.getItem('priority'))
-            this.formData.priority = JSON.parse(localStorage.getItem('priority'))
+          if (sessionStorage.getItem('priority'))
+            this.formData.priority = JSON.parse(sessionStorage.getItem('priority'))
           else  this.formData.priority = this.defaultPrio
         }
       }
@@ -246,8 +246,8 @@ export default {
       for (let stat of this.statuses) {
         if (stat.name == 'დასაწყები') {
           this.defaultStatus = stat
-          if (localStorage.getItem('status'))
-            this.formData.status = JSON.parse(localStorage.getItem('status'))
+          if (sessionStorage.getItem('status'))
+            this.formData.status = JSON.parse(sessionStorage.getItem('status'))
           else this.formData.status = this.defaultStatus.id
         }
       }
@@ -273,21 +273,21 @@ export default {
       }
     },
     selectPriority(priorityId) {
-      localStorage.setItem('priority', JSON.stringify(priorityId))
-      this.formData.priority = JSON.parse(localStorage.getItem('priority'))
+      sessionStorage.setItem('priority', JSON.stringify(priorityId))
+      this.formData.priority = JSON.parse(sessionStorage.getItem('priority'))
       this.showIcons = false
     },
     selectEmployee(employeeId) {
-      localStorage.setItem('employee', JSON.stringify(employeeId))
-      this.formData.employees = JSON.parse(localStorage.getItem('employee'))
+      sessionStorage.setItem('employee', JSON.stringify(employeeId))
+      this.formData.employees = JSON.parse(sessionStorage.getItem('employee'))
       this.showAvatars = false
     },
     getSelectedPriorityName() {
-      if (!localStorage.getItem('priority')) {
+      if (!sessionStorage.getItem('priority')) {
         return [this.defaultPrio.name, this.defaultPrio.icon]
       }
       
-      const priority = JSON.parse(localStorage.getItem('priority')).id
+      const priority = JSON.parse(sessionStorage.getItem('priority')).id
       const selectedPriority = this.priorities.find(p => p.id == priority)
       return [
         selectedPriority ? selectedPriority.name : this.defaultPrio.name, 
@@ -295,13 +295,13 @@ export default {
       ]
     },
     saveStatus() {
-      localStorage.setItem('status', JSON.stringify(this.formData.status))
+      sessionStorage.setItem('status', JSON.stringify(this.formData.status))
     },
     getSelectedEmployeeName() {
-      if (!localStorage.getItem('employee')) {
+      if (!sessionStorage.getItem('employee')) {
         return ["", ""]
       } else {
-        const employeeId = JSON.parse(localStorage.getItem('employee'))
+        const employeeId = JSON.parse(sessionStorage.getItem('employee'))
         const selectedEmployee = this.employees.find(e => e.id == employeeId)
         if (selectedEmployee) {
           return [`${selectedEmployee.name} ${selectedEmployee.surname}`, selectedEmployee.avatar]
@@ -311,20 +311,20 @@ export default {
       }
     },
     updateEmployees() {
-      localStorage.setItem('department', JSON.stringify(this.formData.department))
-      localStorage.setItem('depSelected', JSON.stringify(this.departmentSelected))
-      localStorage.setItem('employee', [])
-      localStorage.setItem('selectedDepEmployees', [])
+      sessionStorage.setItem('department', JSON.stringify(this.formData.department))
+      sessionStorage.setItem('depSelected', JSON.stringify(this.departmentSelected))
+      sessionStorage.setItem('employee', [])
+      sessionStorage.setItem('selectedDepEmployees', [])
       this.formData.employees = null
       this.selectedDepEmployees = []
       this.departmentSelected = true
-      localStorage.setItem('depSelected', JSON.stringify(this.departmentSelected))
+      sessionStorage.setItem('depSelected', JSON.stringify(this.departmentSelected))
       for (let employee of this.employees) {
         if (employee.department.id == this.formData.department) {
           this.selectedDepEmployees.push(employee)
         }
       }
-      localStorage.setItem('selectedDepEmployees', JSON.stringify(this.selectedDepEmployees))
+      sessionStorage.setItem('selectedDepEmployees', JSON.stringify(this.selectedDepEmployees))
     },
     submitForm() {
       if (this.validateForm()) {
@@ -357,15 +357,15 @@ export default {
       this.formData.employees = ''
       this.formData.status = this.defaultStatus.id
       this.formData.priority = this.defaultPrio.id
-      localStorage.setItem('priority', [])
-      localStorage.setItem('status', [])
-      localStorage.setItem('employee', [])
-      localStorage.setItem('department', [])
-      localStorage.setItem('depSelected', [])
-      localStorage.setItem('selectedDepEmployees', [])
-      localStorage.setItem('name', [])
-      localStorage.setItem('desc', [])
-      localStorage.setItem('deadline', [])
+      sessionStorage.setItem('priority', [])
+      sessionStorage.setItem('status', [])
+      sessionStorage.setItem('employee', [])
+      sessionStorage.setItem('department', [])
+      sessionStorage.setItem('depSelected', [])
+      sessionStorage.setItem('selectedDepEmployees', [])
+      sessionStorage.setItem('name', [])
+      sessionStorage.setItem('desc', [])
+      sessionStorage.setItem('deadline', [])
     },
     validateForm() {
       let isValid = true
@@ -425,8 +425,8 @@ export default {
         this.departmentSelected = !this.departmentSelected
     },
     checkMoreThan() {
-      localStorage.setItem('name', JSON.stringify(this.formData.name))
-      localStorage.setItem('desc', JSON.stringify(this.formData.description))
+      sessionStorage.setItem('name', JSON.stringify(this.formData.name))
+      sessionStorage.setItem('desc', JSON.stringify(this.formData.description))
     },
     async handleEmployeeCreated() {
       alert("Employee created!")
@@ -451,11 +451,11 @@ export default {
         this.formData.deadline = this.getTomorrowDate()
       if (!this.checkDateIsValid(this.formData.deadline)) {
         alert("დედლაინი არ შეიძლება იყოს წარსულში.");
-         if (localStorage.getItem('deadline')) 
-          this.formData.deadline = JSON.parse(localStorage.getItem('deadline'))
+         if (sessionStorage.getItem('deadline')) 
+          this.formData.deadline = JSON.parse(sessionStorage.getItem('deadline'))
         else this.formData.deadline = this.getTomorrowDate()
       }
-      localStorage.setItem('deadline', JSON.stringify(this.formData.deadline))
+      sessionStorage.setItem('deadline', JSON.stringify(this.formData.deadline))
     }
   }
 }

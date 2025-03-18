@@ -37,9 +37,9 @@ export default {
       router.push('/')
     },
     goToAssignmentCreatePage() {
-      localStorage.setItem('prioFilters', [])
-      localStorage.setItem('depFilters', [])
-      localStorage.setItem('empFilters', [])
+      sessionStorage.setItem('prioFilters', [])
+      sessionStorage.setItem('depFilters', [])
+      sessionStorage.setItem('empFilters', [])
       router.push('/createAssignment')
     },
     openEmployeeModal() {

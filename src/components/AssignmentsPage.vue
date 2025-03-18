@@ -173,30 +173,30 @@ export default {
       }
     },
     loadFiltersFromStorage() {
-      this.filters.departments = localStorage.getItem('depFilters') 
-        ? JSON.parse(localStorage.getItem('depFilters')) 
+      this.filters.departments = sessionStorage.getItem('depFilters') 
+        ? JSON.parse(sessionStorage.getItem('depFilters')) 
         : []
-      this.filters.priorities = localStorage.getItem('prioFilters') 
-        ? JSON.parse(localStorage.getItem('prioFilters')) 
+      this.filters.priorities = sessionStorage.getItem('prioFilters') 
+        ? JSON.parse(sessionStorage.getItem('prioFilters')) 
         : []
-        this.filters.employees = localStorage.getItem('empFilters') 
-        ? JSON.parse(localStorage.getItem('empFilters')) 
+        this.filters.employees = sessionStorage.getItem('empFilters') 
+        ? JSON.parse(sessionStorage.getItem('empFilters')) 
         : []
     },
     getDepFilters(filters) {
       this.filters.departments = []
       this.filters.departments = filters
-      localStorage.setItem('depFilters', JSON.stringify(this.filters.departments))
+      sessionStorage.setItem('depFilters', JSON.stringify(this.filters.departments))
     },
     getPrioFilters(filters) {
       this.filters.priorities = []
       this.filters.priorities = filters
-      localStorage.setItem('prioFilters', JSON.stringify(this.filters.priorities))
+      sessionStorage.setItem('prioFilters', JSON.stringify(this.filters.priorities))
     },
     getEmployeeFilters(filters) {
       this.filters.employees = []
       this.filters.employees = filters
-      localStorage.setItem('empFilters', JSON.stringify(this.filters.employees))
+      sessionStorage.setItem('empFilters', JSON.stringify(this.filters.employees))
     },
     shouldDisplayTask(task) {
     const { departments, priorities, employees } = this.filters
@@ -248,9 +248,9 @@ export default {
     this.filters.departments = []
     this.filters.priorities = []
     this.filters.employees = []
-    localStorage.setItem('prioFilters', [])
-    localStorage.setItem('depFilters', [])
-    localStorage.setItem('empFilters', [])
+    sessionStorage.setItem('prioFilters', [])
+    sessionStorage.setItem('depFilters', [])
+    sessionStorage.setItem('empFilters', [])
   },
   goToInnerPage(task) {
     router.push({
@@ -260,21 +260,21 @@ export default {
       }
     }
   )
-    localStorage.setItem('prioFilters', [])
-    localStorage.setItem('depFilters', [])
-    localStorage.setItem('empFilters', [])
+    sessionStorage.setItem('prioFilters', [])
+    sessionStorage.setItem('depFilters', [])
+    sessionStorage.setItem('empFilters', [])
   },
   removeFromFilterDep(dep) {
     this.filters.departments = this.filters.departments.filter(d => d != dep)
-    localStorage.setItem('depFilters', JSON.stringify(this.filters.departments))
+    sessionStorage.setItem('depFilters', JSON.stringify(this.filters.departments))
   },
   removeFromFilterPrio(prio) {
     this.filters.priorities = this.filters.priorities.filter(p => p != prio)
-    localStorage.setItem('prioFilters', JSON.stringify(this.filters.priorities))
+    sessionStorage.setItem('prioFilters', JSON.stringify(this.filters.priorities))
   },
   removeEmployeesFilter() {
     this.filters.employees = []
-    localStorage.setItem('empFilters', [])
+    sessionStorage.setItem('empFilters', [])
   }
   }
 }

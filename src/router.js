@@ -1,10 +1,10 @@
-import { createWebHistory, createRouter } from 'vue-router'
+import { createWebHashHistory, createRouter } from 'vue-router'
 import AssignmentsPage from './components/AssignmentsPage.vue'
 import AssignmentCreatePage from './components/AssignmentCreatePage.vue'
 import AssignmentInnerPage from './components/AssignmentInnerPage.vue'
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory('/redberry/'),
     routes: [
         {
             path: '/',
