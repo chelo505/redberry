@@ -180,6 +180,9 @@ export default {
       showEmployeeModal: false
     }
   },
+  mounted() {
+    document.body.style.overflow = "hidden"
+  },
   created() {
     this.fetchDepartmentData()
     this.fetchPrioritiesData()
@@ -204,6 +207,7 @@ export default {
     document.addEventListener('click', this.handleClickOutsideEmp)
   },
   beforeUnmount() {
+    document.body.style.overflow = ''
     document.removeEventListener('click', this.handleClickOutside)
     document.removeEventListener('click', this.handleClickOutsideEmp)
   },
@@ -462,8 +466,6 @@ export default {
 </script>
   
 <style>
-
-
 .page-title {
   position: relative;
   width: 1684px;
