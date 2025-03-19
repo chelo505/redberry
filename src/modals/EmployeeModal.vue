@@ -68,8 +68,8 @@
         
         <div class="field-group">
           <label for="department">დეპარტამენტი*</label>
-          <div class="select-container" :class="{ 'error-border': errors.department }">
-            <select id="department" v-model="department">
+          <div class="select-container" >
+            <select id="department" v-model="department" :class="{ 'error-border': errors.department }">
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
