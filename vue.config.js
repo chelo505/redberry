@@ -5,8 +5,3 @@ module.exports = defineConfig({
     ? '/redberry/'
     : '/'
 })
-
-
-
-
-//deployment stuck
