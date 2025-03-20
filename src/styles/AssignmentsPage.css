@@ -683,6 +683,7 @@
 }
 
 .filters {
+  width: 90%;
   gap: 8px;
   list-style: none;
   position: relative;
