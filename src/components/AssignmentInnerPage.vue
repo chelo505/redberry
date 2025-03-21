@@ -159,11 +159,11 @@ export default {
     },
     convertDateFormat(inputDate) {
         const date = new Date(inputDate)
-        const day = date.getDate() + 1
+        const day = date.getDate()
         const month = date.getMonth() + 1
         const year = date.getFullYear()
         const weekday = date.getDay()
-        const weekdays = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'შაბ', 'კვი']
+        const weekdays = [ 'კვი', 'ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ']
         return `${weekdays[weekday]} - ${day}/${month}/${year}`
     },
     async createComment() {

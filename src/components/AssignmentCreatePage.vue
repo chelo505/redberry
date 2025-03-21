@@ -350,7 +350,7 @@ export default {
         this.resetForm()
         setTimeout(() => {
           router.push('/')
-        }, 50)  
+        }, 100)  
       }
     },
     resetForm() {
