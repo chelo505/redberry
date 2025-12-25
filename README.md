@@ -1,24 +1,32 @@
-# redberry
+# Redberry
+[Website](https://chelo505.github.io/redberry/)
 
-## Project setup
-```
-npm install
-```
+A modern **front-end web application** built using **Vue.js**, focusing on clean UI design, component-based architecture, and interactive user experience.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## 🚀 Features
+- Single Page Application (SPA)
+- Reusable Vue components
+- Reactive data binding
+- Smooth UI interactions
+- Scalable front-end structure
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## 🛠 Tech Stack
+- Vue.js
+- JavaScript
+- HTML
+- CSS
 
-### Lints and fixes files
-```
-npm run lint
-```
+## 📚 What I Learned
+- Component-driven development
+- Vue.js reactivity system
+- Structuring scalable front-end projects
+- UI/UX best practices for SPAs
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## ▶️ How to Run
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start development server: `npm run serve`
+4. Open `http://localhost:8080`
+
+## 📌 Notes
+This project focuses on strengthening modern front-end skills and Vue.js application architecture.
