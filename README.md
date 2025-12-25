@@ -16,12 +16,6 @@ A modern **front-end web application** built using **Vue.js**, focusing on clean
 - HTML
 - CSS
 
-## 📚 What I Learned
-- Component-driven development
-- Vue.js reactivity system
-- Structuring scalable front-end projects
-- UI/UX best practices for SPAs
-
 ## ▶️ How to Run
 1. Clone the repository
 2. Install dependencies: `npm install`
