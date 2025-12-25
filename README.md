@@ -27,6 +27,3 @@ A modern **front-end web application** built using **Vue.js**, focusing on clean
 2. Install dependencies: `npm install`
 3. Start development server: `npm run serve`
 4. Open `http://localhost:8080`
-
-## 📌 Notes
-This project focuses on strengthening modern front-end skills and Vue.js application architecture.
